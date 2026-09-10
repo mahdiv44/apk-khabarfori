@@ -23,7 +23,7 @@ class _HomeState extends ConsumerState<HomeScreen> {
   int tab = 0;
   @override Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: Image.asset(brandLogo, height: 45, semanticLabel: 'خبرفوری'), actions: [IconButton(tooltip: 'اعلان‌ها', onPressed: () => open(context, const NotificationsScreen()), icon: const Icon(Icons.notifications_outlined))]),
-    drawer: Drawer(child: SafeArea(child: ListView(children: [Padding(padding: const EdgeInsets.all(24), child: Image.asset(brandLogo, height: 90)), ListTile(leading: const Icon(Icons.public), title: const Text('کانال‌های خبرفوری'), onTap: () { Navigator.pop(context); open(context, const OfficialChannelsScreen()); }), ListTile(leading: const Icon(Icons.people_outline), title: const Text('همکاران سازمان'), onTap: () { Navigator.pop(context); open(context, const EmployeesScreen()); }), ListTile(leading: const Icon(Icons.chat_outlined), title: const Text('ارتباط با سردبیر'), onTap: () { Navigator.pop(context); open(context, const MessagesScreen()); }), ListTile(leading: const Icon(Icons.bookmark_outline), title: const Text('ذخیره‌ها'), onTap: () { Navigator.pop(context); open(context, const BookmarksScreen()); }), ListTile(leading: const Icon(Icons.workspace_premium_outlined), title: const Text('دیدگاه‌های ویژه'), onTap: () { Navigator.pop(context); open(context, const OpinionsScreen()); })]))),
+    drawer: Drawer(child: SafeArea(child: ListView(children: [Padding(padding: const EdgeInsets.all(24), child: Image.asset(brandLogo, height: 90)), ListTile(leading: const Icon(Icons.trending_up), title: const Text('پرطرفدارهای تلگرام'), onTap: () { Navigator.pop(context); open(context, const TelegramTopScreen()); }), ListTile(leading: const Icon(Icons.public), title: const Text('کانال‌های خبرفوری'), onTap: () { Navigator.pop(context); open(context, const OfficialChannelsScreen()); }), ListTile(leading: const Icon(Icons.people_outline), title: const Text('همکاران سازمان'), onTap: () { Navigator.pop(context); open(context, const EmployeesScreen()); }), ListTile(leading: const Icon(Icons.chat_outlined), title: const Text('ارتباط با سردبیر'), onTap: () { Navigator.pop(context); open(context, const MessagesScreen()); }), ListTile(leading: const Icon(Icons.bookmark_outline), title: const Text('ذخیره‌ها'), onTap: () { Navigator.pop(context); open(context, const BookmarksScreen()); }), ListTile(leading: const Icon(Icons.workspace_premium_outlined), title: const Text('دیدگاه‌های ویژه'), onTap: () { Navigator.pop(context); open(context, const OpinionsScreen()); })]))),
     body: IndexedStack(index: tab, children: const [NewsScreen(), VipScreen(), ProfileScreen()]),
     bottomNavigationBar: NavigationBar(selectedIndex: tab, onDestinationSelected: (v) => setState(() => tab = v), destinations: const [NavigationDestination(icon: Icon(Icons.newspaper_outlined), selectedIcon: Icon(Icons.newspaper), label: 'اخبار'), NavigationDestination(icon: Icon(Icons.workspace_premium_outlined), label: 'اشتراک ویژه'), NavigationDestination(icon: Icon(Icons.person_outline), label: 'حساب من')]),
   );
@@ -145,4 +145,48 @@ class _OfficialChannelsState extends State<OfficialChannelsScreen> {
     if(!snapshot.hasData) return const Center(child:CircularProgressIndicator());
     return ListView(padding:const EdgeInsets.all(20),children:[Image.asset(brandLogo,height:105),const SizedBox(height:20),const Text('نشانی‌ها از پیوندهای وب‌سایت خبرفوری گرفته شده‌اند.',textAlign:TextAlign.center),ListTile(leading:const Icon(Icons.public),title:const Text('وب‌سایت خبرفوری'),onTap:()=>launch(brandWebsite)),...snapshot.data!.map((channel)=>Card(child:ListTile(leading:const Icon(Icons.send_outlined),title:Text(channel['name']!),subtitle:Text(channel['url']!,textDirection:TextDirection.ltr),trailing:const Icon(Icons.open_in_new),onTap:()=>launch(channel['url']!))))]);
   }));
+}
+
+class TelegramTopScreen extends ConsumerWidget {
+  const TelegramTopScreen({super.key});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => RemoteScreen(
+    title: 'پرطرفدارهای تلگرام',
+    path: '/social/telegram/top',
+    action: IconButton(tooltip: 'به‌روزرسانی', icon: const Icon(Icons.refresh),
+      onPressed: () => ref.invalidate(remoteProvider('/social/telegram/top'))),
+    builder: (data) {
+      if (data['connected'] != true) {
+        return Center(child: Padding(padding: const EdgeInsets.all(24),
+          child: Text(data['message'] ?? 'دریافت آمار تلگرام هنوز فعال نشده است.')));
+      }
+      final items = data['items'] as List;
+      return ListView(padding: const EdgeInsets.all(20), children: [
+        const Text('کانال @AkhbareFori · ۲۴ ساعت اخیر', style: TextStyle(fontSize: 20)),
+        const Text('ترتیب بر اساس مجموع واکنش‌ها و فورواردها'),
+        Text('آخرین دریافت: ${data['capturedAt']}'),
+        if (data['stale'] == true) const Text('آمار به‌روز نیست؛ آخرین اطلاعات دریافت‌شده نمایش داده می‌شود.'),
+        if (data['complete'] == false) const Text('رتبه‌بندی از پیام‌های بررسی‌شده است؛ پوشش بازه کامل نیست.'),
+        if ((data['missingMetrics'] as num? ?? 0) > 0) Text('${data['missingMetrics']} پیام فاقد آمار کامل از رتبه‌بندی کنار گذاشته شدند.'),
+        if (items.isEmpty) const Text('پیامی با آمار کامل در بازه اخیر پیدا نشد.'),
+        ...items.asMap().entries.map((entry) {
+          final post = entry.value as Map;
+          return Card(child: Padding(padding: const EdgeInsets.all(18), child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('رتبه ${entry.key + 1} · امتیاز ${post['score']}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Text(post['excerpt'] as String, style: const TextStyle(fontSize: 17, height: 1.8)),
+              Text('${post['reactions']} واکنش · ${post['forwards']} فوروارد'),
+              TextButton(onPressed: () async {
+                try {
+                  final opened = await launchUrl(Uri.parse(post['url'] as String), mode: LaunchMode.externalApplication);
+                  if (!opened && context.mounted) notice(context, 'باز کردن پیوند انجام نشد.');
+                } catch (_) { if (context.mounted) notice(context, 'باز کردن پیوند انجام نشد.'); }
+              }, child: const Text('مشاهده اصل خبر در تلگرام')),
+            ],
+          )));
+        }),
+      ]);
+    },
+  );
 }

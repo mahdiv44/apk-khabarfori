@@ -1,0 +1,14 @@
+services:
+  telegram:
+    build: ./collectors/telegram
+    restart: unless-stopped
+    env_file: .env.telegram
+    environment:
+      TELEGRAM_INGEST_TOKEN: ${TELEGRAM_INGEST_TOKEN:?Run telegram configuration first}
+    volumes:
+      - telegram_session:/session
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  telegram_session:

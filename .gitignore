@@ -60,3 +60,8 @@ next-env.d.ts
 **/key.properties
 
 **/__pycache__/
+
+# VPS database backups contain private records.
+/backups/
+**/*.session
+**/*.session-journal
