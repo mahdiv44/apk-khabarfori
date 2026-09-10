@@ -1,0 +1,2296 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "KhabarFori API",
+    "version": "1.0.0",
+    "description": "Production NestJS contract. Internal permissions are enforced server-side. Monetary amounts are integer IRR."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000/api/v1"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Create account",
+        "operationId": "post_auth_register",
+        "tags": [
+          "auth"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Register"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Authenticate",
+        "operationId": "post_auth_login",
+        "tags": [
+          "auth"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Rotate refresh token",
+        "operationId": "post_auth_refresh",
+        "tags": [
+          "auth"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Refresh"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Revoke all own sessions",
+        "operationId": "post_auth_logout",
+        "tags": [
+          "auth"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      }
+    },
+    "/auth/password": {
+      "post": {
+        "summary": "Change password",
+        "operationId": "post_auth_password",
+        "tags": [
+          "auth"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Password"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "summary": "Request reset delivery",
+        "operationId": "post_auth_forgot-password",
+        "tags": [
+          "auth"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Forgot"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "summary": "Redeem reset token",
+        "operationId": "post_auth_reset-password",
+        "tags": [
+          "auth"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reset"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile": {
+      "get": {
+        "summary": "Read own profile",
+        "operationId": "get_profile",
+        "tags": [
+          "profile"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update own name",
+        "operationId": "patch_profile",
+        "tags": [
+          "profile"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Profile"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/news": {
+      "get": {
+        "summary": "Paginated news summaries",
+        "operationId": "get_news",
+        "tags": [
+          "news"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vip",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "internal",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create news",
+        "operationId": "post_news",
+        "tags": [
+          "news"
+        ],
+        "x-required-permission": "news:write",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/News"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/news/{id}": {
+      "get": {
+        "summary": "Read article or locked preview",
+        "operationId": "get_news_id",
+        "tags": [
+          "news"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Update news",
+        "operationId": "patch_news_id",
+        "tags": [
+          "news"
+        ],
+        "x-required-permission": "news:write and ownership/editor rules",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/News"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Archive news",
+        "operationId": "delete_news_id",
+        "tags": [
+          "news"
+        ],
+        "x-required-permission": "news:publish",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/news/{id}/views": {
+      "post": {
+        "summary": "Deduplicated view count",
+        "operationId": "post_news_id_views",
+        "tags": [
+          "news"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/news/{id}/comments": {
+      "get": {
+        "summary": "Read article comments",
+        "operationId": "get_news_id_comments",
+        "tags": [
+          "news"
+        ],
+        "x-required-permission": "signed-in with article access",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "post": {
+        "summary": "Post comment",
+        "operationId": "post_news_id_comments",
+        "tags": [
+          "news"
+        ],
+        "x-required-permission": "signed-in with article access",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/news/{id}/reactions": {
+      "post": {
+        "summary": "Like article",
+        "operationId": "post_news_id_reactions",
+        "tags": [
+          "news"
+        ],
+        "x-required-permission": "signed-in with article access",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Remove own like",
+        "operationId": "delete_news_id_reactions",
+        "tags": [
+          "news"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/bookmarks": {
+      "get": {
+        "summary": "Read own bookmarks",
+        "operationId": "get_bookmarks",
+        "tags": [
+          "bookmarks"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      }
+    },
+    "/bookmarks/{id}": {
+      "post": {
+        "summary": "Bookmark news",
+        "operationId": "post_bookmarks_id",
+        "tags": [
+          "bookmarks"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Remove bookmark",
+        "operationId": "delete_bookmarks_id",
+        "tags": [
+          "bookmarks"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/home": {
+      "get": {
+        "summary": "Reader home and personalization",
+        "operationId": "get_home",
+        "tags": [
+          "home"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": []
+      }
+    },
+    "/workspace": {
+      "get": {
+        "summary": "Permission-filtered aggregate",
+        "operationId": "get_workspace",
+        "tags": [
+          "workspace"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": []
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "List users",
+        "operationId": "get_users",
+        "tags": [
+          "users"
+        ],
+        "x-required-permission": "users:read",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      }
+    },
+    "/users/{id}/roles": {
+      "patch": {
+        "summary": "Replace role grants",
+        "operationId": "patch_users_id_roles",
+        "tags": [
+          "users"
+        ],
+        "x-required-permission": "users:manage",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Roles"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/employees": {
+      "get": {
+        "summary": "Read internal directory",
+        "operationId": "get_employees",
+        "tags": [
+          "employees"
+        ],
+        "x-required-permission": "employees:read",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create employee",
+        "operationId": "post_employees",
+        "tags": [
+          "employees"
+        ],
+        "x-required-permission": "employees:write",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Employee"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/employees/{id}": {
+      "patch": {
+        "summary": "Update employee",
+        "operationId": "patch_employees_id",
+        "tags": [
+          "employees"
+        ],
+        "x-required-permission": "employees:write",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Employee"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete employee",
+        "operationId": "delete_employees_id",
+        "tags": [
+          "employees"
+        ],
+        "x-required-permission": "employees:write",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/messages": {
+      "get": {
+        "summary": "Read own messages or editor inbox",
+        "operationId": "get_messages",
+        "tags": [
+          "messages"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      },
+      "post": {
+        "summary": "Contact editor",
+        "operationId": "post_messages",
+        "tags": [
+          "messages"
+        ],
+        "x-required-permission": "messages:write",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Message"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages/{id}": {
+      "patch": {
+        "summary": "Reply and update status",
+        "operationId": "patch_messages_id",
+        "tags": [
+          "messages"
+        ],
+        "x-required-permission": "messages:reply",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reply"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/subscriptions/plans": {
+      "get": {
+        "summary": "List active plans",
+        "operationId": "get_subscriptions_plans",
+        "tags": [
+          "subscriptions"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": []
+      }
+    },
+    "/subscriptions/checkout": {
+      "post": {
+        "summary": "Create idempotent checkout",
+        "operationId": "post_subscriptions_checkout",
+        "tags": [
+          "subscriptions"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Checkout"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 128
+            }
+          }
+        ]
+      }
+    },
+    "/subscriptions/webhook": {
+      "post": {
+        "summary": "Verify provider callback",
+        "operationId": "post_subscriptions_webhook",
+        "tags": [
+          "subscriptions"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Webhook"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Payment-Signature",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{64}$"
+            }
+          }
+        ]
+      }
+    },
+    "/subscriptions/status": {
+      "get": {
+        "summary": "Read active entitlement",
+        "operationId": "get_subscriptions_status",
+        "tags": [
+          "subscriptions"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      }
+    },
+    "/subscriptions/payments": {
+      "get": {
+        "summary": "Read payment history",
+        "operationId": "get_subscriptions_payments",
+        "tags": [
+          "subscriptions"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "summary": "Read own notifications",
+        "operationId": "get_notifications",
+        "tags": [
+          "notifications"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      }
+    },
+    "/notifications/read": {
+      "post": {
+        "summary": "Mark own notifications read",
+        "operationId": "post_notifications_read",
+        "tags": [
+          "notifications"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      }
+    },
+    "/notifications/devices": {
+      "post": {
+        "summary": "Register FCM device",
+        "operationId": "post_notifications_devices",
+        "tags": [
+          "notifications"
+        ],
+        "x-required-permission": "signed-in",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Device"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media": {
+      "post": {
+        "summary": "Upload verified cover image",
+        "operationId": "post_media",
+        "tags": [
+          "media"
+        ],
+        "x-required-permission": "news:write",
+        "responses": {
+          "201": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "JPEG, PNG or WebP, maximum 5 MiB"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics": {
+      "get": {
+        "summary": "Read monitoring aggregates",
+        "operationId": "get_analytics",
+        "tags": [
+          "analytics"
+        ],
+        "x-required-permission": "analytics:read",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      }
+    },
+    "/social": {
+      "get": {
+        "summary": "Read social provider state",
+        "operationId": "get_social",
+        "tags": [
+          "social"
+        ],
+        "x-required-permission": "analytics:read",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Database readiness",
+        "operationId": "get_health",
+        "tags": [
+          "health"
+        ],
+        "x-required-permission": "public",
+        "responses": {
+          "200": {
+            "description": "Success; see API.md for the response shape"
+          },
+          "400": {
+            "description": "Validation failure"
+          },
+          "401": {
+            "description": "Missing/invalid session"
+          },
+          "403": {
+            "description": "Permission or entitlement denied"
+          },
+          "404": {
+            "description": "Not found or hidden draft"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Required integration unavailable"
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Login": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identifier",
+          "password"
+        ],
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "Email or E.164 phone"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 72
+          }
+        }
+      },
+      "Register": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identifier",
+          "name",
+          "password"
+        ],
+        "properties": {
+          "identifier": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 72
+          }
+        }
+      },
+      "News": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "description",
+          "content",
+          "category",
+          "status",
+          "vip",
+          "tags"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          },
+          "content": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100000
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "سیاست",
+              "اقتصاد",
+              "جامعه",
+              "فناوری",
+              "بین‌الملل",
+              "فرهنگ"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "REVIEW",
+              "PUBLISHED"
+            ]
+          },
+          "vip": {
+            "type": "boolean"
+          },
+          "tags": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "maxLength": 60
+            }
+          },
+          "coverImage": {
+            "type": "string",
+            "format": "uri"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "NEWS",
+              "EXPERT_OPINION",
+              "EDITOR_NOTE",
+              "EXCLUSIVE"
+            ]
+          }
+        }
+      },
+      "Message": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "subject",
+          "body",
+          "type"
+        ],
+        "properties": {
+          "subject": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 10000
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "MESSAGE",
+              "IDEA",
+              "REPORT",
+              "REVIEW"
+            ]
+          }
+        }
+      },
+      "Reply": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reply",
+          "status"
+        ],
+        "properties": {
+          "reply": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "REVIEWING",
+              "COMPLETED"
+            ]
+          }
+        }
+      },
+      "Employee": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fullName",
+          "position",
+          "department",
+          "biography",
+          "email"
+        ],
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "minLength": 2
+          },
+          "position": {
+            "type": "string",
+            "minLength": 2
+          },
+          "department": {
+            "type": "string",
+            "enum": [
+              "مدیریت",
+              "تحریریه",
+              "خبرنگاری",
+              "روابط عمومی",
+              "فنی",
+              "پشتیبانی"
+            ]
+          },
+          "biography": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "Roles": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "roles"
+        ],
+        "properties": {
+          "roles": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "string",
+              "enum": [
+                "SUPER_ADMIN",
+                "HOLDING_MANAGER",
+                "EDITOR_IN_CHIEF",
+                "EMPLOYEE",
+                "VIP_SUBSCRIBER",
+                "NORMAL_USER"
+              ]
+            }
+          }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          }
+        }
+      },
+      "Password": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ],
+        "properties": {
+          "currentPassword": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 72
+          }
+        }
+      },
+      "Refresh": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "refreshToken"
+        ],
+        "properties": {
+          "refreshToken": {
+            "type": "string"
+          }
+        }
+      },
+      "Forgot": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identifier"
+        ],
+        "properties": {
+          "identifier": {
+            "type": "string"
+          }
+        }
+      },
+      "Reset": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "token",
+          "password"
+        ],
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12
+          }
+        }
+      },
+      "Checkout": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "planId"
+        ],
+        "properties": {
+          "planId": {
+            "type": "string",
+            "enum": [
+              "monthly",
+              "quarterly",
+              "yearly"
+            ]
+          }
+        }
+      },
+      "Webhook": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reference"
+        ],
+        "properties": {
+          "reference": {
+            "type": "string"
+          }
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      },
+      "Device": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 4096
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/api.dart';
+import '../data/news_repository.dart';
+import '../domain/article.dart';
+final newsRepositoryProvider = Provider<NewsRepository>((ref) => ApiNewsRepository(ref.watch(apiProvider)));
+final categoryProvider = StateProvider<String?>((ref) => null);
+final searchProvider = StateProvider<String>((ref) => '');
+final newsProvider = FutureProvider.autoDispose<NewsPage>((ref) => ref.watch(newsRepositoryProvider).list(category: ref.watch(categoryProvider), query: ref.watch(searchProvider)));
+final articleProvider = FutureProvider.autoDispose.family<Article, String>((ref, id) => ref.watch(newsRepositoryProvider).detail(id));
+final remoteProvider = FutureProvider.autoDispose.family<dynamic, String>((ref, path) => ref.watch(apiProvider).get(path));

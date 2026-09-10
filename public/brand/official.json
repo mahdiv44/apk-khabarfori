@@ -1,0 +1,59 @@
+{
+  "name": "KhabarFori",
+  "displayName": "خبرفوری",
+  "website": "https://www.khabarfoori.com/",
+  "sourcePage": "https://www.khabarfoori.com/",
+  "verifiedAt": "2026-09-09",
+  "logoSource": "https://www.khabarfoori.com/images/logo.png",
+  "iconSource": "https://assets.khabarfoori.com/favicon-152.png",
+  "channels": [
+    {
+      "name": "تلگرام",
+      "url": "https://t.me/akhbarefori"
+    },
+    {
+      "name": "بله",
+      "url": "https://ble.ir/akhbarefori"
+    },
+    {
+      "name": "ایتا",
+      "url": "https://eitaa.com/AkhbareFori"
+    },
+    {
+      "name": "روبیکا",
+      "url": "https://rubika.ir/AkhbareFori"
+    },
+    {
+      "name": "اینستاگرام",
+      "url": "http://instagram.com/_u/akhbare.fori"
+    },
+    {
+      "name": "آپارات",
+      "url": "https://www.aparat.com/akhbar.fori"
+    },
+    {
+      "name": "سروش پلاس",
+      "url": "https://splus.ir/AkhbareFori"
+    },
+    {
+      "name": "ایکس / توییتر",
+      "url": "https://twitter.com/akhbare_fori"
+    },
+    {
+      "name": "تماشا",
+      "url": "https://tamasha.com/khabarfoori"
+    },
+    {
+      "name": "نماشا",
+      "url": "https://www.namasha.com/khabarfoori"
+    },
+    {
+      "name": "فیسبوک",
+      "url": "https://www.facebook.com/khabarefori"
+    },
+    {
+      "name": "گپ",
+      "url": "http://gap.im/AkhbareFori"
+    }
+  ]
+}

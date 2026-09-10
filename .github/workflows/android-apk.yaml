@@ -1,0 +1,49 @@
+name: Build installable KhabarFori Android APK
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: 'Deployed NestJS HTTPS URL including /api/v1'
+        required: true
+        type: string
+      web_url:
+        description: 'Public HTTPS web origin for sharing'
+        required: true
+        type: string
+      build_mode:
+        description: 'review = debug-signed test APK; release = your signing key'
+        type: choice
+        options: [review, release]
+        default: review
+permissions:
+  contents: read
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      API_URL: ${{ inputs.api_url }}
+      PUBLIC_WEB_URL: ${{ inputs.web_url }}
+      BUILD_MODE: ${{ inputs.build_mode }}
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Validate, test and build Android APK
+        run: bash mobile/build-apk.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KhabarFori-android-${{ inputs.build_mode }}
+          path: mobile/build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
+          retention-days: 14

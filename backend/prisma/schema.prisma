@@ -1,0 +1,299 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+enum NewsStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+enum MessageStatus {
+  NEW
+  REVIEWING
+  COMPLETED
+}
+enum PaymentStatus {
+  PENDING
+  VERIFIED
+  FAILED
+}
+enum ArticleKind {
+  NEWS
+  EXPERT_OPINION
+  EDITOR_NOTE
+  EXCLUSIVE
+}
+model User {
+  id String @id @default(uuid()) @db.Uuid
+  email String? @unique
+  phone String? @unique
+  name String
+  passwordHash String
+  tokenVersion Int @default(0)
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  lastActiveAt DateTime @default(now())
+  roles UserRole[]
+  news News[]
+  comments Comment[]
+  reactions Reaction[]
+  bookmarks Bookmark[]
+  subscriptions Subscription[]
+  payments Payment[]
+  messages EditorMessage[]
+  notifications Notification[]
+  refreshTokens RefreshToken[]
+  devices Device[]
+  analytics Analytics[]
+  resets PasswordReset[]
+  @@index([lastActiveAt])
+  @@map("users")
+}
+model Role {
+  id String @id @default(uuid()) @db.Uuid
+  name String @unique
+  users UserRole[]
+  permissions RolePermission[]
+  @@map("roles")
+}
+model Permission {
+  id String @id @default(uuid()) @db.Uuid
+  name String @unique
+  roles RolePermission[]
+  @@map("permissions")
+}
+model UserRole {
+  userId String @db.Uuid
+  roleId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  role Role @relation(fields:[roleId],references:[id],onDelete:Cascade)
+  @@id([userId,roleId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+model RolePermission {
+  roleId String @db.Uuid
+  permissionId String @db.Uuid
+  role Role @relation(fields:[roleId],references:[id],onDelete:Cascade)
+  permission Permission @relation(fields:[permissionId],references:[id],onDelete:Cascade)
+  @@id([roleId,permissionId])
+  @@map("role_permissions")
+}
+model RefreshToken {
+  id String @id @default(uuid()) @db.Uuid
+  hash String @unique
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+model PasswordReset {
+  id String @id @default(uuid()) @db.Uuid
+  hash String @unique
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  expiresAt DateTime
+  usedAt DateTime?
+  @@map("password_resets")
+}
+model Category {
+  id String @id @default(uuid()) @db.Uuid
+  name String @unique
+  slug String @unique
+  news News[]
+  @@map("categories")
+}
+model Tag {
+  id String @id @default(uuid()) @db.Uuid
+  name String @unique
+  news NewsTag[]
+  @@map("tags")
+}
+model NewsTag {
+  newsId String @db.Uuid
+  tagId String @db.Uuid
+  news News @relation(fields:[newsId],references:[id],onDelete:Cascade)
+  tag Tag @relation(fields:[tagId],references:[id],onDelete:Cascade)
+  @@id([newsId,tagId])
+  @@index([tagId])
+  @@map("news_tags")
+}
+model News {
+  id String @id @default(uuid()) @db.Uuid
+  title String @db.VarChar(200)
+  description String @db.VarChar(500)
+  content String
+  coverImage String?
+  categoryId String @db.Uuid
+  category Category @relation(fields:[categoryId],references:[id])
+  authorId String @db.Uuid
+  author User @relation(fields:[authorId],references:[id])
+  status NewsStatus @default(DRAFT)
+  kind ArticleKind @default(NEWS)
+  vip Boolean @default(false)
+  featured Boolean @default(false)
+  views Int @default(0)
+  publishedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tags NewsTag[]
+  comments Comment[]
+  reactions Reaction[]
+  bookmarks Bookmark[]
+  analytics Analytics[]
+  @@index([status,publishedAt(sort:Desc),id])
+  @@index([categoryId,status,publishedAt(sort:Desc)])
+  @@index([authorId,status])
+  @@index([status,views(sort:Desc)])
+  @@map("news")
+}
+model Comment {
+  id String @id @default(uuid()) @db.Uuid
+  newsId String @db.Uuid
+  userId String @db.Uuid
+  news News @relation(fields:[newsId],references:[id],onDelete:Cascade)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  body String @db.VarChar(2000)
+  createdAt DateTime @default(now())
+  @@index([newsId,createdAt])
+  @@map("comments")
+}
+model Reaction {
+  newsId String @db.Uuid
+  userId String @db.Uuid
+  news News @relation(fields:[newsId],references:[id],onDelete:Cascade)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@id([newsId,userId])
+  @@map("reactions")
+}
+model Bookmark {
+  newsId String @db.Uuid
+  userId String @db.Uuid
+  news News @relation(fields:[newsId],references:[id],onDelete:Cascade)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  createdAt DateTime @default(now())
+  @@id([userId,newsId])
+  @@map("bookmarks")
+}
+model VipPlan {
+  id String @id
+  name String
+  months Int
+  amount Int
+  currency String @default("IRR")
+  active Boolean @default(true)
+  subscriptions Subscription[]
+  payments Payment[]
+  @@map("vip_plans")
+}
+model Subscription {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  planId String
+  paymentId String @unique @db.Uuid
+  user User @relation(fields:[userId],references:[id])
+  plan VipPlan @relation(fields:[planId],references:[id])
+  payment Payment @relation(fields:[paymentId],references:[id])
+  startsAt DateTime
+  expiresAt DateTime
+  @@index([userId,expiresAt])
+  @@map("subscriptions")
+}
+model Payment {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  planId String
+  amount Int
+  currency String
+  status PaymentStatus @default(PENDING)
+  providerReference String? @unique
+  transactionId String? @unique
+  idempotencyKey String @unique
+  createdAt DateTime @default(now())
+  verifiedAt DateTime?
+  user User @relation(fields:[userId],references:[id])
+  plan VipPlan @relation(fields:[planId],references:[id])
+  subscription Subscription?
+  @@index([userId,createdAt(sort:Desc)])
+  @@map("payments")
+}
+model Department {
+  id String @id @default(uuid()) @db.Uuid
+  name String @unique
+  employees Employee[]
+  @@map("departments")
+}
+model Employee {
+  id String @id @default(uuid()) @db.Uuid
+  fullName String
+  photo String?
+  position String
+  departmentId String @db.Uuid
+  department Department @relation(fields:[departmentId],references:[id])
+  biography String
+  email String
+  phone String?
+  @@index([departmentId,fullName])
+  @@map("employees")
+}
+model EditorMessage {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id])
+  subject String @db.VarChar(200)
+  body String
+  type String
+  status MessageStatus @default(NEW)
+  reply String?
+  repliedBy String? @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId,createdAt(sort:Desc)])
+  @@index([status,createdAt(sort:Desc)])
+  @@map("editor_messages")
+}
+model Notification {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  title String
+  body String
+  readAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([userId,readAt,createdAt(sort:Desc)])
+  @@map("notifications")
+}
+model Device {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  token String @unique
+  @@index([userId])
+  @@map("devices")
+}
+model Analytics {
+  id String @id @default(uuid()) @db.Uuid
+  event String
+  userId String? @db.Uuid
+  newsId String? @db.Uuid
+  user User? @relation(fields:[userId],references:[id],onDelete:SetNull)
+  news News? @relation(fields:[newsId],references:[id],onDelete:SetNull)
+  metadata Json?
+  createdAt DateTime @default(now())
+  @@index([event,createdAt])
+  @@index([newsId,createdAt])
+  @@map("analytics")
+}
+model Setting {
+  key String @id
+  value Json
+  updatedAt DateTime @updatedAt
+  @@map("settings")
+}

@@ -1,0 +1,29 @@
+name: khabarfori
+description: KhabarFori corporate and public news application
+publish_to: none
+version: 1.0.0+1
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_riverpod: ^2.6.1
+  dio: ^5.7.0
+  flutter_secure_storage: ^9.2.4
+  firebase_core: ^3.15.0
+  firebase_messaging: ^15.2.0
+  share_plus: ^10.1.4
+  url_launcher: ^6.3.1
+  intl: any
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/brand/khabarfoori-logo.png
+    - assets/brand/khabarfoori-icon.png
+    - assets/brand/official.json

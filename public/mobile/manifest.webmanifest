@@ -1,0 +1,21 @@
+{
+  "id": "/mobile",
+  "name": "KhabarFori | خبرفوری",
+  "short_name": "خبرفوری",
+  "description": "خبرها و تحلیل‌های خبرفوری در موبایل",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "/mobile",
+  "scope": "/mobile",
+  "display": "standalone",
+  "background_color": "#f5f7f8",
+  "theme_color": "#145846",
+  "icons": [
+    {
+      "src": "/brand/khabarfoori-icon.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
