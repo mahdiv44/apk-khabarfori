@@ -40,13 +40,25 @@ jobs:
       - run: npm ci
       - run: node scripts/prepare-next-admin.mjs
       - run: npm --prefix apps/admin run build
-  mobile:
+   mobile:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
-        with: {channel: stable}
+        with:
+          channel: stable
+
       - run: bash bootstrap.sh
         working-directory: mobile
+
       - run: flutter build apk --debug
         working-directory: mobile
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: KhabarFori-Android-APK
+          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
