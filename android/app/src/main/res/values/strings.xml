@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">KhabarFori</string>
+    <string name="app_tagline">سامانه همراه و تحریریه هوشمند خبرفوری</string>
+    <string name="tab_news">اخبار</string>
+    <string name="tab_vip">دیدگاه ویژه</string>
+    <string name="tab_channels">کانال‌ها</string>
+    <string name="tab_messages">سردبیر</string>
+    <string name="tab_profile">حساب من</string>
+    <string name="breaking_news">فوری</string>
+    <string name="share_article">اشتراک‌گذاری خبر</string>
+    <string name="save_offline">ذخیره آفلاین</string>
+    <string name="send_tip">ارسال سوژه</string>
+</resources>
