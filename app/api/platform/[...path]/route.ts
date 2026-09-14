@@ -12,7 +12,6 @@ async function handle(request:Request){
  if(!['GET','HEAD'].includes(method)){const origin=request.headers.get('origin');if(origin&&origin!==url.origin)return respond({message:'درخواست نامعتبر'},403);if(Number(request.headers.get('content-length')||0)>150000)return respond({message:'حجم درخواست بیش از حد مجاز است'},413)}
  if(e.KHABARFORI_API_URL)return productionProxy(request,e.KHABARFORI_API_URL);
  const owner=request.headers.get('oai-authenticated-user-id');if(!owner)return respond({message:'برای استفاده از محیط نمایشی وارد حساب ChatGPT شوید.'},401);
- if(path==='social/telegram/top'&&method==='GET')return respond({connected:false,items:[],message:'دریافت آمار واقعی تلگرام به اتصال سرور نیاز دارد.'});
  const db=e.DB;if(!db)return respond({message:'ذخیره‌سازی موقتاً در دسترس نیست.'},503);
  const records=await db.prepare('SELECT kind,id,data FROM preview_records WHERE owner = ?').bind(owner).all();const rows=records.results as {kind:string;id:string;data:string}[];
  const merge=(kind:string,seed:any[])=>{const changes=rows.filter(r=>r.kind===kind);return [...seed.map(s=>changes.find(r=>r.id===s.id)?JSON.parse(changes.find(r=>r.id===s.id)!.data):s),...changes.filter(r=>!seed.some(s=>s.id===r.id)).map(r=>JSON.parse(r.data))].filter(x=>!x.deleted)};

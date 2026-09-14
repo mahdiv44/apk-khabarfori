@@ -50,6 +50,7 @@ model User {
   refreshTokens RefreshToken[]
   devices Device[]
   analytics Analytics[]
+  adminLogs AdminLog[]
   resets PasswordReset[]
   @@index([lastActiveAt])
   @@map("users")
@@ -240,8 +241,51 @@ model Employee {
   biography String
   email String
   phone String?
+  employeeCode String @unique
+  employmentDate DateTime
+  status String @default("ACTIVE")
+  salaryProfile SalaryProfile?
   @@index([departmentId,fullName])
   @@map("employees")
+}
+model SalaryProfile {
+  id String @id @default(uuid()) @db.Uuid
+  employeeId String @unique @db.Uuid
+  salaryPasswordHash String
+  employee Employee @relation(fields:[employeeId],references:[id],onDelete:Cascade)
+  records SalaryRecord[]
+  failedAttempts Int @default(0)
+  lockedUntil DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("salary_profiles")
+}
+model SalaryRecord {
+  id String @id @default(uuid()) @db.Uuid
+  salaryProfileId String @db.Uuid
+  salaryProfile SalaryProfile @relation(fields:[salaryProfileId],references:[id],onDelete:Cascade)
+  period String @db.VarChar(7)
+  grossAmount Int
+  netAmount Int
+  currency String @default("IRR")
+  notes String?
+  createdAt DateTime @default(now())
+  @@unique([salaryProfileId,period])
+  @@index([period])
+  @@map("salary_records")
+}
+model AdminLog {
+  id String @id @default(uuid()) @db.Uuid
+  actorId String? @db.Uuid
+  actor User? @relation(fields:[actorId],references:[id],onDelete:SetNull)
+  action String
+  entity String
+  entityId String?
+  metadata Json?
+  createdAt DateTime @default(now())
+  @@index([actorId,createdAt])
+  @@index([entity,entityId,createdAt])
+  @@map("admin_logs")
 }
 model EditorMessage {
   id String @id @default(uuid()) @db.Uuid
