@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.6"
+        android:scaleY="0.6"
+        android:translateX="21.6"
+        android:translateY="21.6">
+        <!-- White emblem shape representing news broadcast / paper -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M24,18h60c3.3,0 6,2.7 6,6v60c0,3.3 -2.7,6 -6,6H24c-3.3,0 -6,-2.7 -6,-6V24C18,20.7 20.7,18 24,18z M32,32v8h44v-8H32z M32,46v6h44v-6H32z M32,58v6h28v-6H32z M32,70v6h20v-6H32z" />
+        <!-- Gold accent dot representing breaking alert -->
+        <path
+            android:fillColor="#F6C344"
+            android:pathData="M66,66m-8,0a8,8 0 1,0 16,0a8,8 0 1,0 -16,0" />
+    </group>
+</vector>

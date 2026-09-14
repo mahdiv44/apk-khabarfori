@@ -1,5 +1,10 @@
 name: KhabarFori CI
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
 jobs:
   api:
     runs-on: ubuntu-latest
@@ -10,43 +15,82 @@ jobs:
           POSTGRES_DB: khabarfori_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-        ports: [5432:5432]
-        options: --health-cmd pg_isready --health-interval 5s --health-retries 10
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-retries 10
+
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/khabarfori_test
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/khabarfori_test
       JWT_SECRET: ci-only-not-a-production-secret-at-least-32-bytes
       ADMIN_EMAIL: admin@example.com
       ADMIN_PASSWORD: CI-only-password-12345678
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
-        with: {node-version: 22, cache: npm, cache-dependency-path: backend/package-lock.json}
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
       - run: npm ci
         working-directory: backend
+
       - run: npm run build && npm test && npm run db:migrate && npm run db:seed
         working-directory: backend
-      - run: |
-          node dist/src/main.js &
-          for i in $(seq 1 30); do curl --fail http://localhost:4000/api/v1/health && break; sleep 1; done
-          node test/integration.mjs
+
+      - name: Run integration tests
         working-directory: backend
+        run: |
+          node dist/src/main.js &
+          for i in $(seq 1 30); do
+            curl --fail http://localhost:4000/api/v1/health && break
+            sleep 1
+          done
+          node test/integration.mjs
+
   admin:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
-        with: {node-version: 22, cache: npm}
+        with:
+          node-version: 22
+          cache: npm
+
       - run: npm ci
+
       - run: node scripts/prepare-next-admin.mjs
+
       - run: npm --prefix apps/admin run build
+
   mobile:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
-        with: {channel: stable}
-      - run: bash bootstrap.sh
+        with:
+          channel: stable
+
+      - name: Prepare and test Flutter app
+        run: bash bootstrap.sh
         working-directory: mobile
-      - run: flutter build apk --debug
+
+      - name: Build Android APK
+        run: flutter build apk --debug
         working-directory: mobile
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: KhabarFori-Android-APK
+          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14

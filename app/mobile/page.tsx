@@ -1,2 +1,5 @@
-import Workspace from '../workspace';
-export default function MobilePage(){return <Workspace readerMode/>}
+import AndroidApp from '../android-app';
+
+export default function MobilePage() {
+  return <AndroidApp />;
+}
