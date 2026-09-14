@@ -1,5 +1,2 @@
-import AndroidApp from './android-app';
-
-export default function Page() {
-  return <AndroidApp />;
-}
+import Workspace from './workspace';
+export default function Page(){return <Workspace/>}
