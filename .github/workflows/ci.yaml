@@ -86,7 +86,7 @@ jobs:
         run: flutter build apk --debug
         working-directory: mobile
       - name: Upload Android APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: KhabarFori-Android-APK
           path: mobile/build/app/outputs/flutter-apk/app-debug.apk
