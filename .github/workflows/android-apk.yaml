@@ -41,7 +41,7 @@ jobs:
           cache: true
       - name: Validate, test and build Android APK
         run: bash mobile/build-apk.sh
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v4
         with:
           name: KhabarFori-android-${{ inputs.build_mode }}
           path: mobile/build/app/outputs/flutter-apk/*.apk

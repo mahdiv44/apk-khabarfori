@@ -1,13 +1,13 @@
 const response=(data:unknown,status=200,headers=new Headers())=>{headers.set('Cache-Control','no-store');return Response.json(data,{status,headers})};
-export async function productionProxy(request:Request,baseUrl:string){
+export async function productionProxy(request:Request,baseUrl:string,publicOrigin?:string){
  const url=new URL(request.url),path=url.pathname.split('/api/platform/')[1]||'',method=request.method;
  if(!baseUrl)return response({message:'سرویس API پیکربندی نشده است.'},503);
- if(!['GET','HEAD'].includes(method)&&request.headers.get('origin')!==url.origin)return response({message:'درخواست نامعتبر'},403);
+ if(!['GET','HEAD'].includes(method)&&request.headers.get('origin')!==(publicOrigin||url.origin))return response({message:'درخواست نامعتبر'},403);
  if(path.startsWith('auth/refresh'))return response({message:'مسیر نامعتبر'},404);
  const cookies=request.headers.get('cookie')||'';
  let access=cookies.match(/(?:^|; )kf_access=([^;]*)/)?.[1];const refresh=cookies.match(/(?:^|; )kf_refresh=([^;]*)/)?.[1];
  const body=['GET','HEAD'].includes(method)?undefined:await request.arrayBuffer();if(body&&body.byteLength>6*1024*1024)return response({message:'حجم درخواست بیش از حد مجاز است'},413);
- const headers=new Headers();const secure=url.protocol==='https:'?'; Secure':'';
+ const headers=new Headers();const secure=(publicOrigin?new URL(publicOrigin).protocol:url.protocol)==='https:'?'; Secure':'';
  const storeTokens=(tokens:any)=>{access=tokens.accessToken;headers.append('Set-Cookie',`kf_access=${tokens.accessToken}; Path=/; HttpOnly${secure}; SameSite=Strict; Max-Age=900`);headers.append('Set-Cookie',`kf_refresh=${tokens.refreshToken}; Path=/api/platform; HttpOnly${secure}; SameSite=Strict; Max-Age=2592000`);delete tokens.accessToken;delete tokens.refreshToken};
  const fetchApi=()=>fetch(baseUrl.replace(/\/$/,'')+'/api/v1/'+path+url.search,{method,headers:{'Content-Type':request.headers.get('content-type')||'application/json',...(access?{Authorization:'Bearer '+access}:{}),...(request.headers.get('idempotency-key')?{'Idempotency-Key':request.headers.get('idempotency-key')!}:{})},body,redirect:'error',signal:AbortSignal.timeout(20000)});
  try{
