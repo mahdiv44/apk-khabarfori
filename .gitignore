@@ -9,3 +9,4 @@ build/
 coverage/
 android/.gradle/
 ios/Pods/
+mobile/*.jks
