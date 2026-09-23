@@ -341,3 +341,74 @@ model Setting {
   updatedAt DateTime @updatedAt
   @@map("settings")
 }
+
+model Salary {
+  id String @id @default(uuid()) @db.Uuid
+
+  employeeId String @db.Uuid
+  employee User @relation(fields:[employeeId], references:[id], onDelete:Cascade)
+
+  amount Int
+  month Int
+  year Int
+  description String?
+
+  createdAt DateTime @default(now())
+
+  @@index([employeeId])
+  @@map("salaries")
+}
+
+model MeetingRequest {
+  id String @id @default(uuid()) @db.Uuid
+
+  employeeId String @db.Uuid
+  employee User @relation(fields:[employeeId], references:[id], onDelete:Cascade)
+
+  title String
+  description String?
+
+  status String @default("PENDING")
+
+  createdAt DateTime @default(now())
+
+  @@index([employeeId])
+  @@map("meeting_requests")
+}
+
+model Meeting {
+  id String @id @default(uuid()) @db.Uuid
+
+  employeeId String @db.Uuid
+  employee User @relation(fields:[employeeId], references:[id], onDelete:Cascade)
+
+  managerId String @db.Uuid
+  manager User @relation("ManagerMeetings", fields:[managerId], references:[id])
+
+  title String
+  date DateTime
+
+  status String @default("APPROVED")
+
+  createdAt DateTime @default(now())
+
+  @@index([employeeId])
+  @@index([managerId])
+  @@map("meetings")
+}
+
+model AnonymousMessage {
+  id String @id @default(uuid()) @db.Uuid
+
+  managerId String @db.Uuid
+  manager User @relation(fields:[managerId], references:[id], onDelete:Cascade)
+
+  message String
+
+  read Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([managerId])
+  @@map("anonymous_messages")
+}

@@ -24,8 +24,21 @@ export function rankTelegram(items:TelegramItem[],now=new Date()){
  const earliest=now.getTime()-86400000;
  const unique=new Map(items.map(item=>[item.id,item]));
  return [...unique.values()].filter(item=>{
+  console.log("TELEGRAM DEBUG", JSON.stringify(item));
+
+
   const date=Date.parse(item.publishedAt);
-  return date>=earliest&&date<=now.getTime()&&Number.isInteger(item.reactions)&&Number.isInteger(item.forwards);
+console.log({
+ id:item.id,
+ published:item.publishedAt,
+ date,
+ earliest,
+ now:now.getTime(),
+ reactions:item.reactions,
+ forwards:item.forwards
+});
+
+return true;
  }).map(item=>({...item,score:item.reactions!+item.forwards!,url:`https://t.me/AkhbareFori/${item.id}`}))
  .sort((a,b)=>b.score-a.score||Date.parse(b.publishedAt)-Date.parse(a.publishedAt)||b.id-a.id).slice(0,50);
 }
