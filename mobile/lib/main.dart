@@ -4,14 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/api.dart';
+import 'core/firebase_config.dart';
 import 'core/brand.dart';
 import 'screens.dart';
 @pragma('vm:entry-point')
-Future<void> backgroundMessage(RemoteMessage message) async { await Firebase.initializeApp(); }
+Future<void> backgroundMessage(RemoteMessage message) async { await Firebase.initializeApp(options: firebaseOptions()); }
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (const bool.fromEnvironment('ENABLE_FCM')) {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(options: firebaseOptions());
     FirebaseMessaging.onBackgroundMessage(backgroundMessage);
   }
   runApp(const ProviderScope(child: KhabarFori()));

@@ -1,0 +1,24 @@
+services:
+  db:
+    restart: unless-stopped
+  api:
+    restart: unless-stopped
+  admin:
+    restart: unless-stopped
+    environment:
+      KHABARFORI_PUBLIC_ORIGIN: https://${APP_DOMAIN:?Set APP_DOMAIN}
+  gateway:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Set APP_DOMAIN}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./production/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      admin: {condition: service_started}
+volumes:
+  caddy_data:
+  caddy_config:

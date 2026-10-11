@@ -43,13 +43,13 @@ async def collect(client):
         if not message.message:
             continue
         item = entry(message)
-        if item['reactions'] is None or item['forwards'] is None:
+        if item['views'] is None:
             missing += 1
             continue
         items.append(item)
     else:
         complete = scanned < 1000
-    items.sort(key=lambda i: (i['reactions']+i['forwards'],i['publishedAt'],i['id']),reverse=True)
+    items.sort(key=lambda i: (i['views'],i['publishedAt'],i['id']),reverse=True)
     await asyncio.to_thread(publish, {'capturedAt':now.isoformat(), 'complete':complete,
         'scanned':scanned,'missingMetrics':missing,'items':items[:100]})
     print(f'Snapshot stored: {len(items[:100])} posts; scanned={scanned}; complete={complete}',flush=True)

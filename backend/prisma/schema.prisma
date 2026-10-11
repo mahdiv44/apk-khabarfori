@@ -1,343 +1,504 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
-  provider = "postgresql"
-  url = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
 enum NewsStatus {
   DRAFT
   REVIEW
   PUBLISHED
   ARCHIVED
 }
+
 enum MessageStatus {
   NEW
   REVIEWING
   COMPLETED
 }
+
 enum PaymentStatus {
   PENDING
   VERIFIED
   FAILED
 }
+
 enum ArticleKind {
   NEWS
   EXPERT_OPINION
   EDITOR_NOTE
   EXCLUSIVE
 }
+
 model User {
-  id String @id @default(uuid()) @db.Uuid
-  email String? @unique
-  phone String? @unique
-  name String
-  passwordHash String
-  tokenVersion Int @default(0)
-  active Boolean @default(true)
-  createdAt DateTime @default(now())
-  lastActiveAt DateTime @default(now())
-  roles UserRole[]
-  news News[]
-  comments Comment[]
-  reactions Reaction[]
-  bookmarks Bookmark[]
-  subscriptions Subscription[]
-  payments Payment[]
-  messages EditorMessage[]
-  notifications Notification[]
-  refreshTokens RefreshToken[]
-  devices Device[]
-  analytics Analytics[]
-  adminLogs AdminLog[]
-  resets PasswordReset[]
+  id                String             @id @default(uuid()) @db.Uuid
+  email             String?            @unique
+  phone             String?            @unique
+  name              String
+  passwordHash      String
+  tokenVersion      Int                @default(0)
+  active            Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  lastActiveAt      DateTime           @default(now())
+  roles             UserRole[]
+  news              News[]
+  comments          Comment[]
+  reactions         Reaction[]
+  bookmarks         Bookmark[]
+  subscriptions     Subscription[]
+  payments          Payment[]
+  messages          EditorMessage[]
+  notifications     Notification[]
+  refreshTokens     RefreshToken[]
+  devices           Device[]
+  analytics         Analytics[]
+  adminLogs         AdminLog[]
+  resets            PasswordReset[]
+  salaries          Salary[]
+  meetingRequests   MeetingRequest[]
+  meetings          Meeting[]
+  managedMeetings   Meeting[]          @relation("ManagerMeetings")
+  anonymousMessages AnonymousMessage[]
+  passkeys          Passkey[]
+  employeeProfile   Employee?
+
   @@index([lastActiveAt])
   @@map("users")
 }
+
 model Role {
-  id String @id @default(uuid()) @db.Uuid
-  name String @unique
-  users UserRole[]
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String           @unique
+  users       UserRole[]
   permissions RolePermission[]
+
   @@map("roles")
 }
+
 model Permission {
-  id String @id @default(uuid()) @db.Uuid
-  name String @unique
+  id    String           @id @default(uuid()) @db.Uuid
+  name  String           @unique
   roles RolePermission[]
+
   @@map("permissions")
 }
+
 model UserRole {
   userId String @db.Uuid
   roleId String @db.Uuid
-  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
-  role Role @relation(fields:[roleId],references:[id],onDelete:Cascade)
-  @@id([userId,roleId])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
   @@index([roleId])
   @@map("user_roles")
 }
+
 model RolePermission {
-  roleId String @db.Uuid
-  permissionId String @db.Uuid
-  role Role @relation(fields:[roleId],references:[id],onDelete:Cascade)
-  permission Permission @relation(fields:[permissionId],references:[id],onDelete:Cascade)
-  @@id([roleId,permissionId])
+  roleId       String     @db.Uuid
+  permissionId String     @db.Uuid
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
   @@map("role_permissions")
 }
+
 model RefreshToken {
-  id String @id @default(uuid()) @db.Uuid
-  hash String @unique
-  userId String @db.Uuid
-  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  id        String    @id @default(uuid()) @db.Uuid
+  hash      String    @unique
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   revokedAt DateTime?
+
   @@index([userId])
   @@map("refresh_tokens")
 }
+
 model PasswordReset {
-  id String @id @default(uuid()) @db.Uuid
-  hash String @unique
-  userId String @db.Uuid
-  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  id        String    @id @default(uuid()) @db.Uuid
+  hash      String    @unique
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
-  usedAt DateTime?
+  usedAt    DateTime?
+
   @@map("password_resets")
 }
+
 model Category {
-  id String @id @default(uuid()) @db.Uuid
+  id   String @id @default(uuid()) @db.Uuid
   name String @unique
   slug String @unique
   news News[]
+
   @@map("categories")
 }
+
 model Tag {
-  id String @id @default(uuid()) @db.Uuid
-  name String @unique
+  id   String    @id @default(uuid()) @db.Uuid
+  name String    @unique
   news NewsTag[]
+
   @@map("tags")
 }
+
 model NewsTag {
   newsId String @db.Uuid
-  tagId String @db.Uuid
-  news News @relation(fields:[newsId],references:[id],onDelete:Cascade)
-  tag Tag @relation(fields:[tagId],references:[id],onDelete:Cascade)
-  @@id([newsId,tagId])
+  tagId  String @db.Uuid
+  news   News   @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([newsId, tagId])
   @@index([tagId])
   @@map("news_tags")
 }
+
 model News {
-  id String @id @default(uuid()) @db.Uuid
-  title String @db.VarChar(200)
-  description String @db.VarChar(500)
-  content String
-  coverImage String?
-  categoryId String @db.Uuid
-  category Category @relation(fields:[categoryId],references:[id])
-  authorId String @db.Uuid
-  author User @relation(fields:[authorId],references:[id])
-  status NewsStatus @default(DRAFT)
-  kind ArticleKind @default(NEWS)
-  vip Boolean @default(false)
-  featured Boolean @default(false)
-  views Int @default(0)
+  id          String      @id @default(uuid()) @db.Uuid
+  title       String      @db.VarChar(200)
+  description String      @db.VarChar(500)
+  content     String
+  coverImage  String?
+  categoryId  String      @db.Uuid
+  category    Category    @relation(fields: [categoryId], references: [id])
+  authorId    String      @db.Uuid
+  author      User        @relation(fields: [authorId], references: [id])
+  status      NewsStatus  @default(DRAFT)
+  kind        ArticleKind @default(NEWS)
+  vip         Boolean     @default(false)
+  featured    Boolean     @default(false)
+  views       Int         @default(0)
+  sourceUrl   String?     @unique
+  sourceViews Int?
+  sourceKind  String?
   publishedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tags NewsTag[]
-  comments Comment[]
-  reactions Reaction[]
-  bookmarks Bookmark[]
-  analytics Analytics[]
-  @@index([status,publishedAt(sort:Desc),id])
-  @@index([categoryId,status,publishedAt(sort:Desc)])
-  @@index([authorId,status])
-  @@index([status,views(sort:Desc)])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  tags        NewsTag[]
+  comments    Comment[]
+  reactions   Reaction[]
+  bookmarks   Bookmark[]
+  analytics   Analytics[]
+
+  @@index([status, publishedAt(sort: Desc), id])
+  @@index([categoryId, status, publishedAt(sort: Desc)])
+  @@index([authorId, status])
+  @@index([status, views(sort: Desc)])
   @@map("news")
 }
+
 model Comment {
-  id String @id @default(uuid()) @db.Uuid
-  newsId String @db.Uuid
-  userId String @db.Uuid
-  news News @relation(fields:[newsId],references:[id],onDelete:Cascade)
-  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
-  body String @db.VarChar(2000)
+  id        String   @id @default(uuid()) @db.Uuid
+  newsId    String   @db.Uuid
+  userId    String   @db.Uuid
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String   @db.VarChar(2000)
   createdAt DateTime @default(now())
-  @@index([newsId,createdAt])
+
+  @@index([newsId, createdAt])
   @@map("comments")
 }
+
 model Reaction {
   newsId String @db.Uuid
   userId String @db.Uuid
-  news News @relation(fields:[newsId],references:[id],onDelete:Cascade)
-  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
-  @@id([newsId,userId])
+  news   News   @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([newsId, userId])
   @@map("reactions")
 }
+
 model Bookmark {
-  newsId String @db.Uuid
-  userId String @db.Uuid
-  news News @relation(fields:[newsId],references:[id],onDelete:Cascade)
-  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  newsId    String   @db.Uuid
+  userId    String   @db.Uuid
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  @@id([userId,newsId])
+
+  @@id([userId, newsId])
   @@map("bookmarks")
 }
+
 model VipPlan {
-  id String @id
-  name String
-  months Int
-  amount Int
-  currency String @default("IRR")
-  active Boolean @default(true)
+  id            String         @id
+  name          String
+  months        Int
+  amount        Int
+  currency      String         @default("IRR")
+  active        Boolean        @default(true)
   subscriptions Subscription[]
-  payments Payment[]
+  payments      Payment[]
+
   @@map("vip_plans")
 }
+
 model Subscription {
-  id String @id @default(uuid()) @db.Uuid
-  userId String @db.Uuid
-  planId String
-  paymentId String @unique @db.Uuid
-  user User @relation(fields:[userId],references:[id])
-  plan VipPlan @relation(fields:[planId],references:[id])
-  payment Payment @relation(fields:[paymentId],references:[id])
-  startsAt DateTime
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  planId    String
+  paymentId String   @unique @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  plan      VipPlan  @relation(fields: [planId], references: [id])
+  payment   Payment  @relation(fields: [paymentId], references: [id])
+  startsAt  DateTime
   expiresAt DateTime
-  @@index([userId,expiresAt])
+
+  @@index([userId, expiresAt])
   @@map("subscriptions")
 }
+
 model Payment {
-  id String @id @default(uuid()) @db.Uuid
-  userId String @db.Uuid
-  planId String
-  amount Int
-  currency String
-  status PaymentStatus @default(PENDING)
-  providerReference String? @unique
-  transactionId String? @unique
-  idempotencyKey String @unique
-  createdAt DateTime @default(now())
-  verifiedAt DateTime?
-  user User @relation(fields:[userId],references:[id])
-  plan VipPlan @relation(fields:[planId],references:[id])
-  subscription Subscription?
-  @@index([userId,createdAt(sort:Desc)])
+  id                String        @id @default(uuid()) @db.Uuid
+  userId            String        @db.Uuid
+  planId            String
+  amount            Int
+  currency          String
+  status            PaymentStatus @default(PENDING)
+  providerReference String?       @unique
+  transactionId     String?       @unique
+  idempotencyKey    String        @unique
+  createdAt         DateTime      @default(now())
+  verifiedAt        DateTime?
+  user              User          @relation(fields: [userId], references: [id])
+  plan              VipPlan       @relation(fields: [planId], references: [id])
+  subscription      Subscription?
+
+  @@index([userId, createdAt(sort: Desc)])
   @@map("payments")
 }
+
 model Department {
-  id String @id @default(uuid()) @db.Uuid
-  name String @unique
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String     @unique
   employees Employee[]
+
   @@map("departments")
 }
+
 model Employee {
-  id String @id @default(uuid()) @db.Uuid
-  fullName String
-  photo String?
-  position String
-  departmentId String @db.Uuid
-  department Department @relation(fields:[departmentId],references:[id])
-  biography String
-  email String
-  phone String?
-  employeeCode String @unique
+  userId         String?        @unique @db.Uuid
+  user           User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id             String         @id @default(uuid()) @db.Uuid
+  fullName       String
+  photo          String?
+  position       String
+  departmentId   String         @db.Uuid
+  department     Department     @relation(fields: [departmentId], references: [id])
+  biography      String
+  email          String
+  phone          String?
+  employeeCode   String         @unique
   employmentDate DateTime
-  status String @default("ACTIVE")
-  salaryProfile SalaryProfile?
-  @@index([departmentId,fullName])
+  status         String         @default("ACTIVE")
+  salaryProfile  SalaryProfile?
+
+  @@index([departmentId, fullName])
   @@map("employees")
 }
+
 model SalaryProfile {
-  id String @id @default(uuid()) @db.Uuid
-  employeeId String @unique @db.Uuid
+  id                 String         @id @default(uuid()) @db.Uuid
+  employeeId         String         @unique @db.Uuid
+  version            Int            @default(0)
   salaryPasswordHash String
-  employee Employee @relation(fields:[employeeId],references:[id],onDelete:Cascade)
-  records SalaryRecord[]
-  failedAttempts Int @default(0)
-  lockedUntil DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  employee           Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  records            SalaryRecord[]
+  failedAttempts     Int            @default(0)
+  lockedUntil        DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
   @@map("salary_profiles")
 }
+
 model SalaryRecord {
-  id String @id @default(uuid()) @db.Uuid
-  salaryProfileId String @db.Uuid
-  salaryProfile SalaryProfile @relation(fields:[salaryProfileId],references:[id],onDelete:Cascade)
-  period String @db.VarChar(7)
-  grossAmount Int
-  netAmount Int
-  currency String @default("IRR")
-  notes String?
-  createdAt DateTime @default(now())
-  @@unique([salaryProfileId,period])
+  id              String        @id @default(uuid()) @db.Uuid
+  salaryProfileId String        @db.Uuid
+  salaryProfile   SalaryProfile @relation(fields: [salaryProfileId], references: [id], onDelete: Cascade)
+  period          String        @db.VarChar(7)
+  grossAmount     Int
+  netAmount       Int
+  currency        String        @default("IRR")
+  notes           String?
+  createdAt       DateTime      @default(now())
+
+  @@unique([salaryProfileId, period])
   @@index([period])
   @@map("salary_records")
 }
+
 model AdminLog {
-  id String @id @default(uuid()) @db.Uuid
-  actorId String? @db.Uuid
-  actor User? @relation(fields:[actorId],references:[id],onDelete:SetNull)
-  action String
-  entity String
-  entityId String?
-  metadata Json?
+  id        String   @id @default(uuid()) @db.Uuid
+  actorId   String?  @db.Uuid
+  actor     User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
   createdAt DateTime @default(now())
-  @@index([actorId,createdAt])
-  @@index([entity,entityId,createdAt])
+
+  @@index([actorId, createdAt])
+  @@index([entity, entityId, createdAt])
   @@map("admin_logs")
 }
+
 model EditorMessage {
-  id String @id @default(uuid()) @db.Uuid
-  userId String @db.Uuid
-  user User @relation(fields:[userId],references:[id])
-  subject String @db.VarChar(200)
-  body String
-  type String
-  status MessageStatus @default(NEW)
-  reply String?
-  repliedBy String? @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  @@index([userId,createdAt(sort:Desc)])
-  @@index([status,createdAt(sort:Desc)])
+  id        String        @id @default(uuid()) @db.Uuid
+  userId    String        @db.Uuid
+  user      User          @relation(fields: [userId], references: [id])
+  subject   String        @db.VarChar(200)
+  body      String
+  type      String
+  status    MessageStatus @default(NEW)
+  reply     String?
+  repliedBy String?       @db.Uuid
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
   @@map("editor_messages")
 }
+
 model Notification {
-  id String @id @default(uuid()) @db.Uuid
-  userId String @db.Uuid
-  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
-  title String
-  body String
-  readAt DateTime?
-  createdAt DateTime @default(now())
-  @@index([userId,readAt,createdAt(sort:Desc)])
+  pushedAt DateTime?
+  pushAfter DateTime @default(now())
+  pushAttempts Int @default(0)
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt, createdAt(sort: Desc)])
   @@map("notifications")
 }
+
 model Device {
-  id String @id @default(uuid()) @db.Uuid
+  id     String @id @default(uuid()) @db.Uuid
   userId String @db.Uuid
-  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
-  token String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token  String @unique
+
   @@index([userId])
   @@map("devices")
 }
+
 model Analytics {
-  id String @id @default(uuid()) @db.Uuid
-  event String
-  userId String? @db.Uuid
-  newsId String? @db.Uuid
-  user User? @relation(fields:[userId],references:[id],onDelete:SetNull)
-  news News? @relation(fields:[newsId],references:[id],onDelete:SetNull)
-  metadata Json?
+  id        String   @id @default(uuid()) @db.Uuid
+  event     String
+  userId    String?  @db.Uuid
+  newsId    String?  @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  news      News?    @relation(fields: [newsId], references: [id], onDelete: SetNull)
+  metadata  Json?
   createdAt DateTime @default(now())
-  @@index([event,createdAt])
-  @@index([newsId,createdAt])
+
+  @@index([event, createdAt])
+  @@index([newsId, createdAt])
   @@map("analytics")
 }
+
 model Setting {
-  key String @id
-  value Json
+  key       String   @id
+  value     Json
   updatedAt DateTime @updatedAt
+
   @@map("settings")
+}
+
+model Salary {
+  id String @id @default(uuid()) @db.Uuid
+
+  employeeId String @db.Uuid
+  employee   User   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  amount      Int
+  month       Int
+  year        Int
+  description String?
+
+  createdAt DateTime @default(now())
+
+  @@index([employeeId])
+  @@map("salaries")
+}
+
+model MeetingRequest {
+  id String @id @default(uuid()) @db.Uuid
+
+  employeeId String @db.Uuid
+  employee   User   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+
+  status String @default("PENDING")
+
+  createdAt DateTime @default(now())
+
+  @@index([employeeId])
+  @@map("meeting_requests")
+}
+
+model Meeting {
+  id String @id @default(uuid()) @db.Uuid
+
+  employeeId String @db.Uuid
+  employee   User   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  managerId String @db.Uuid
+  manager   User   @relation("ManagerMeetings", fields: [managerId], references: [id])
+
+  title String
+  date  DateTime
+
+  status          String    @default("APPROVED")
+  reminderMinutes Int       @default(30)
+  remindedAt      DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([employeeId])
+  @@index([managerId])
+  @@map("meetings")
+}
+
+model AnonymousMessage {
+  id String @id @default(uuid()) @db.Uuid
+
+  managerId String @db.Uuid
+  manager   User   @relation(fields: [managerId], references: [id], onDelete: Cascade)
+
+  message String
+
+  read Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([managerId])
+  @@map("anonymous_messages")
+}
+
+model Passkey {
+  id         String   @id
+  userId     String   @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  publicKey  Bytes
+  counter    BigInt   @default(0)
+  transports String[]
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@map("passkeys")
 }

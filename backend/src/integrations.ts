@@ -6,7 +6,25 @@ import {initializeApp,applicationDefault,getApps} from 'firebase-admin/app';impo
 import {Db} from './db';import {Permit,Public} from './security';import {CheckoutDto} from './dto';import {addMonthsClamped} from './policy';
 export interface SocialProvider{topics(since:Date):Promise<{tag:string;mentions:number;engagement:number}[]>}
 @Injectable()
-export class NotificationService{constructor(private db:Db){}async send(userId:string,title:string,body:string){const record=await this.db.notification.create({data:{userId,title,body}});if(!process.env.GOOGLE_APPLICATION_CREDENTIALS)return record;if(!getApps().length)initializeApp({credential:applicationDefault()});const tokens=await this.db.device.findMany({where:{userId},take:500});if(tokens.length){const result=await getMessaging().sendEachForMulticast({tokens:tokens.map(t=>t.token),notification:{title,body}});for(let i=0;i<result.responses.length;i++)if(result.responses[i].error?.code==='messaging/registration-token-not-registered')await this.db.device.delete({where:{id:tokens[i].id}})}return record}}
+export class NotificationService{
+ constructor(private db:Db){}
+ async send(userId:string,title:string,body:string){return this.db.notification.create({data:{userId,title,body}})}
+ async dispatch(){
+  if(!process.env.GOOGLE_APPLICATION_CREDENTIALS)return;
+  if(!getApps().length)initializeApp({credential:applicationDefault()});
+  const due=await this.db.$transaction(async tx=>{
+   const rows=await tx.$queryRaw<Array<{id:string;userId:string;title:string;body:string}>>`SELECT id,"userId",title,body FROM notifications WHERE "pushedAt" IS NULL AND "pushAfter"<=NOW() AND "pushAttempts"<10 ORDER BY "createdAt" LIMIT 20 FOR UPDATE SKIP LOCKED`;
+   for(const row of rows)await tx.notification.update({where:{id:row.id},data:{pushAfter:new Date(Date.now()+120000),pushAttempts:{increment:1}}});return rows;
+  });
+  for(const n of due){try{const devices=await this.db.device.findMany({where:{userId:n.userId},take:500});if(!devices.length){await this.db.notification.update({where:{id:n.id},data:{pushAfter:new Date(Date.now()+3600000)}});continue}
+   // Do not put salaries or meeting details onto lock screens.
+   const sent=await getMessaging().sendEachForMulticast({tokens:devices.map(d=>d.token),notification:{title:n.title,body:'برای دیدن جزئیات وارد خبرفوری شوید.'},data:{notificationId:n.id}});
+   let transient=false;
+   for(let i=0;i<sent.responses.length;i++){const response=sent.responses[i];if(response.success)continue;if(['messaging/registration-token-not-registered','messaging/invalid-registration-token'].includes(response.error?.code||''))await this.db.device.deleteMany({where:{id:devices[i].id}});else transient=true}
+   if(!transient)await this.db.notification.update({where:{id:n.id},data:{pushedAt:new Date()}});
+  }catch{/* The leased record is retried; in-app notification remains available. */}}
+ }
+}
 @Injectable()
 export class PaymentService{
  constructor(private db:Db){}

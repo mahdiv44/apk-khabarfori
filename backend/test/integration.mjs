@@ -22,3 +22,25 @@ assert.equal((await request('/auth/refresh','POST',{refreshToken:registration.da
 assert.equal((await request('/auth/logout','POST',{},refresh.data.accessToken)).status,201);
 assert.equal((await request('/profile','GET',undefined,refresh.data.accessToken)).status,401);
 console.log('PostgreSQL API integration checks passed');
+// Operations regression tests (requires an isolated seeded PostgreSQL instance).
+const hrUser=await request('/auth/register','POST',{identifier:`staff${suffix}@example.com`,name:'Staff Test',password:'Test-password-123456'});
+assert.equal(hrUser.status,201);
+const hrToken=hrUser.data.accessToken;
+const hrProfile=await request('/profile','GET',undefined,hrToken);
+const adminProfile=await request('/profile','GET',undefined,admin.data.accessToken);
+const employee=await request('/employees','POST',{fullName:'Staff Test',position:'Reporter',department:'تحریریه',biography:'Integration fixture',email:`staff${suffix}@example.com`},admin.data.accessToken);
+assert.equal(employee.status,201);
+await request(`/employees/${employee.data.id}/account`,'PATCH',{userId:hrProfile.data.id},admin.data.accessToken);
+assert.equal((await request(`/employees/${employee.data.id}/salary`,'POST',{password:'Salary-test-12345'},admin.data.accessToken)).status,201);
+assert.equal((await request(`/employees/${employee.data.id}/salary/records`,'POST',{period:'1405-07',grossAmount:1000000,netAmount:900000},admin.data.accessToken)).status,201);
+assert.equal((await request('/salary/records','GET',undefined,hrToken)).status,401);
+assert.equal((await request('/salary/unlock','POST',{password:'wrong-pass'},hrToken)).status,401);
+const proof=await request('/salary/unlock','POST',{password:'Salary-test-12345'},hrToken);
+assert.equal(proof.status,201);
+const salary=await fetch(base+'/salary/records',{headers:{Authorization:'Bearer '+hrToken,'X-Salary-Token':proof.data.salaryToken}});
+assert.equal(salary.status,200);assert.equal((await salary.json())[0].netAmount,900000);
+const meeting=await request('/meetings','POST',{title:'Integration meeting',employeeId:hrProfile.data.id,managerId:adminProfile.data.id,date:new Date(Date.now()+600000).toISOString(),reminderMinutes:30},admin.data.accessToken);
+assert.equal(meeting.status,201);
+assert.ok((await request('/meetings','GET',undefined,hrToken)).data.some(m=>m.id===meeting.data.id));
+assert.equal((await request('/meetings','POST',{title:'Forbidden meeting',employeeId:hrProfile.data.id,managerId:adminProfile.data.id,date:new Date(Date.now()+600000).toISOString(),reminderMinutes:30},hrToken)).status,403);
+console.log('Salary and meeting API integration checks passed');

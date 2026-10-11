@@ -4,7 +4,7 @@ const root=process.cwd(),out=resolve(root,'apps/admin');
 await mkdir(out,{recursive:true});
 for(const name of ['components','hooks','lib','public','vendor'])await cp(resolve(root,name),resolve(out,name),{recursive:true});
 await mkdir(resolve(out,'app/api/platform/[...path]'),{recursive:true});
-for(const name of ['layout.tsx','page.tsx','workspace.tsx','article-discussion.tsx','mobile-install.tsx','official-channels.tsx','globals.css'])await cp(resolve(root,'app',name),resolve(out,'app',name));
+for(const name of ['layout.tsx','page.tsx','workspace.tsx','article-discussion.tsx','mobile-install.tsx','official-channels.tsx','telegram-top.tsx','staff-hub.tsx','globals.css'])await cp(resolve(root,'app',name),resolve(out,'app',name));
 await cp(resolve(root,'app/mobile'),resolve(out,'app/mobile'),{recursive:true});
 await cp(resolve(root,'production/proxy.ts'),resolve(out,'lib/proxy.ts'));
 await writeFile(resolve(out,'app/api/platform/[...path]/route.ts'),`import {productionProxy} from '@/lib/proxy';\nexport const dynamic='force-dynamic';\nconst handler=(r:Request)=>productionProxy(r,process.env.KHABARFORI_API_URL||'',process.env.KHABARFORI_PUBLIC_ORIGIN);\nexport const GET=handler;export const POST=handler;export const PATCH=handler;export const DELETE=handler;\n`);

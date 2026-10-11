@@ -1,3 +1,5 @@
+> نسخه اصلاح‌شده اکتبر ۲۰۲۶: ابتدا [START-HERE-FA.md](START-HERE-FA.md) را بخوانید. وضعیت استقرار و آزمون‌ها در همان راهنما مشخص است.
+
 # KhabarFori | خبرفوری
 
 Persian RTL newsroom, public reading experience, enterprise API and Flutter mobile source.

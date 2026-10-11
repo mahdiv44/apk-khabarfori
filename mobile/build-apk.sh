@@ -19,11 +19,18 @@ try:
 except Exception as error:
     raise SystemExit('KhabarFori API is not ready; refusing to build an app pointing at an unavailable server: '+str(error))
 PY
+fcm_args=(--dart-define="ENABLE_FCM=${ENABLE_FCM:-false}")
+if [[ "${ENABLE_FCM:-false}" == "true" ]]; then
+  for key in FIREBASE_API_KEY FIREBASE_APP_ID FIREBASE_SENDER_ID FIREBASE_PROJECT_ID; do
+    [[ -n "${!key:-}" ]] || { echo "$key is required for FCM" >&2; exit 1; }
+    fcm_args+=(--dart-define="$key=${!key}")
+  done
+fi
 bash bootstrap.sh
 if [[ "${BUILD_MODE:-review}" == "release" ]]; then
   python3 configure-signing.py
   trap 'rm -f android/app/khabarfori-upload.jks' EXIT
-  flutter build apk --release --dart-define="API_URL=${API_URL}" --dart-define="PUBLIC_WEB_URL=${PUBLIC_WEB_URL}"
+  flutter build apk --release "${fcm_args[@]}" --dart-define="API_URL=${API_URL}" --dart-define="PUBLIC_WEB_URL=${PUBLIC_WEB_URL}"
 else
-  flutter build apk --debug --dart-define="API_URL=${API_URL}" --dart-define="PUBLIC_WEB_URL=${PUBLIC_WEB_URL}"
+  flutter build apk --debug "${fcm_args[@]}" --dart-define="API_URL=${API_URL}" --dart-define="PUBLIC_WEB_URL=${PUBLIC_WEB_URL}"
 fi

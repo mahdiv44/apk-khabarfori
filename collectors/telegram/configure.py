@@ -4,10 +4,10 @@ from pathlib import Path
 import re
 import secrets
 root=Path(__file__).resolve().parents[2]
-vps=root/'.env.vps'
+vps=root/'.env' if (root/'.env').exists() else root/'.env.vps'
 target=root/'.env.telegram'
 if not vps.exists():
-    raise SystemExit('Configure the VPS first: python3 deploy/vps/configure.py')
+    raise SystemExit('Configure the VPS first: python3 scripts/configure-vps.py')
 if target.exists():
     raise SystemExit('.env.telegram already exists; preserving credentials.')
 api_id=input('Telegram API ID: ').strip()

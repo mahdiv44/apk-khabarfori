@@ -1,0 +1,23 @@
+import 'reflect-metadata';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {JwtService} from '@nestjs/jwt';
+import {SalaryAccess} from '../src/salary';
+import {parseFeed,publicIPv4} from '../src/collectors/website.collector';
+const user={id:'u1',tokenVersion:2} as any;
+const profile={id:'p1',version:3};
+const db={employee:{findUnique:async({where}:any)=>where.userId==='u1'?{status:'ACTIVE',salaryProfile:profile}:null}} as any;
+test('salary requires scoped, signed, unexpired proof tied to account and profile version',async()=>{
+ const jwt=new JwtService({secret:'test-only-secret-with-more-than-32-bytes'});const salary=new SalaryAccess(db,jwt);
+ await assert.rejects(()=>salary.verify(user,''));
+ const access=await jwt.signAsync({sub:'u1',type:'access'},{issuer:'khabarfori',audience:'khabarfori-clients'});
+ await assert.rejects(()=>salary.verify(user,access));
+ const grant=await salary.issue(user);assert.equal((await salary.verify(user,grant.salaryToken)).id,'p1');
+ await assert.rejects(()=>salary.verify({...user,id:'u2'},grant.salaryToken));
+ await assert.rejects(()=>salary.verify({...user,tokenVersion:3},grant.salaryToken));
+ profile.version++;await assert.rejects(()=>salary.verify(user,grant.salaryToken));profile.version--;
+ const expired=await jwt.signAsync({sub:'u1',type:'salary'},{expiresIn:-1,issuer:'khabarfori',audience:'khabarfori-salary'});await assert.rejects(()=>salary.verify(user,expired));
+});
+test('salary identity never falls back to an unverified email',async()=>{const salary=new SalaryAccess(db,new JwtService());await assert.rejects(()=>salary.profile({id:'u2',email:'victim@example.com'} as any))});
+test('feed parser keeps provenance and unknown views, strips HTML and rejects off-origin links',()=>{const items=parseFeed('<rss><channel><item><title>A headline</title><link>https://news.example/story/1</link><description>&lt;b&gt;Summary&lt;/b&gt;</description></item><item><title>Bad</title><link>http://127.0.0.1/private</link></item></channel></rss>','https://news.example/rss');assert.equal(items.length,1);assert.equal(items[0].description,'Summary');assert.equal(items[0].sourceViews,null);assert.equal(items[0].sourceUrl,'https://news.example/story/1')});
+test('feed address policy rejects private, loopback, metadata, reserved and IPv6',()=>{for(const ip of ['127.0.0.1','10.0.0.1','172.16.0.1','192.168.0.1','169.254.169.254','100.64.0.1','0.0.0.0','224.1.2.3','::1','::ffff:127.0.0.1'])assert.equal(publicIPv4(ip),false,ip);assert.equal(publicIPv4('8.8.8.8'),true)});

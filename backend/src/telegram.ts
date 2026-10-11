@@ -22,11 +22,10 @@ export class TelegramSnapshot {
 }
 export function rankTelegram(items:TelegramItem[],now=new Date()){
  const earliest=now.getTime()-86400000;
- const unique=new Map(items.map(item=>[item.id,item]));
- return [...unique.values()].filter(item=>{
+ return [...new Map(items.map(item=>[item.id,item])).values()].filter(item=>{
   const date=Date.parse(item.publishedAt);
-  return date>=earliest&&date<=now.getTime()&&Number.isInteger(item.reactions)&&Number.isInteger(item.forwards);
- }).map(item=>({...item,score:item.reactions!+item.forwards!,url:`https://t.me/AkhbareFori/${item.id}`}))
+  return Number.isFinite(date)&&date>=earliest&&date<=now.getTime()&&Number.isInteger(item.views)&&item.views!>=0;
+ }).map(item=>({...item,score:item.views!,url:`https://t.me/AkhbareFori/${item.id}`}))
  .sort((a,b)=>b.score-a.score||Date.parse(b.publishedAt)-Date.parse(a.publishedAt)||b.id-a.id).slice(0,50);
 }
 export function checkCollector(authorization:string|undefined,secret:string|undefined){
@@ -41,7 +40,7 @@ export class TelegramService {
   const row=await this.db.setting.findUnique({where:{key:'telegram:akhbarefori'}});
   if(!row)return {connected:false,items:[],message:'دریافت آمار تلگرام هنوز فعال نشده است.'};
   const snapshot=row.value as unknown as TelegramSnapshot;
-  return {...snapshot,channel:'AkhbareFori',connected:true,stale:Date.now()-Date.parse(snapshot.capturedAt)>900000,windowHours:24,metric:'reactions+forwards',items:rankTelegram(snapshot.items)};
+  return {...snapshot,channel:'AkhbareFori',connected:true,stale:Date.now()-Date.parse(snapshot.capturedAt)>900000,windowHours:24,metric:'views',items:rankTelegram(snapshot.items)};
  }
  async ingest(body:TelegramSnapshot){
   const age=Date.now()-Date.parse(body.capturedAt);

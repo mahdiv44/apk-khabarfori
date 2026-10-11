@@ -6,15 +6,15 @@ import {validate} from 'class-validator';
 import {rankTelegram,checkCollector,TelegramSnapshot,TelegramService} from '../src/telegram';
 const now=new Date('2026-09-10T12:00:00Z');
 const post=(id:number,reactions:number|null,forwards:number|null,publishedAt='2026-09-10T10:00:00Z')=>({id,reactions,forwards,publishedAt,excerpt:'متن آزمایشی',views:999999});
-test('Telegram ranks reactions plus forwards, excludes unknown counts and old posts',()=>{
- const items=rankTelegram([post(1,100,1),post(2,50,100),post(3,999,null),post(4,9999,9999,'2026-09-08T00:00:00Z')],now);
+test('Telegram ranks measured views and excludes old posts',()=>{
+ const items=rankTelegram([{...post(1,100,1),views:100},{...post(2,50,100),views:150},{...post(3,999,null),views:null},post(4,9999,9999,'2026-09-08T00:00:00Z')],now);
  assert.deepEqual(items.map(x=>x.id),[2,1]);
  assert.equal(items[0].score,150);
  assert.equal(items[0].url,'https://t.me/AkhbareFori/2');
 });
 test('Telegram ranking deduplicates messages and includes measured zero',()=>{
  const items=rankTelegram([post(1,0,0),post(2,1,0),post(2,3,0)],now);
- assert.equal(items.length,2);assert.equal(items[0].score,3);
+ assert.equal(items.length,2);assert.equal(items[0].score,999999);
 });
 test('collector rejects missing configuration and incorrect credential',()=>{
  assert.throws(()=>checkCollector(undefined,undefined));
@@ -30,3 +30,5 @@ test('unconfigured collector never serves invented posts',async()=>{
  assert.deepEqual((await service.read()).items,[]);
  assert.equal((await service.read()).connected,false);
 });
+
+test('unknown views and future posts cannot rank',()=>{assert.equal(rankTelegram([{...post(1,1,1),views:null},post(2,1,1,'2026-09-11T12:00:00Z')],now).length,0)});
