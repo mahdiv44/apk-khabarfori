@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -10,42 +11,59 @@ class Api {
   final storage = const FlutterSecureStorage();
   late final Dio dio;
   Future<void>? _refreshing;
-  Api() {
+  final Dio? refreshClient;
+  Api({this.refreshClient}) {
     if (kReleaseMode && !baseUrl.startsWith('https://')) {
       throw StateError('Release builds require an HTTPS API_URL');
     }
     dio = Dio(BaseOptions(baseUrl: baseUrl, connectTimeout: const Duration(seconds: 15), receiveTimeout: const Duration(seconds: 20)));
     dio.interceptors.add(InterceptorsWrapper(onRequest: (options, handler) async {
-      final token = await storage.read(key: 'access_token');
-      if (token != null) options.headers['Authorization'] = 'Bearer $token';
+      const publicAuth = ['/auth/login','/auth/register','/auth/refresh','/auth/forgot-password','/auth/reset-password'];
+      final token = await savedToken('accessToken');
+      if (token != null && !publicAuth.contains(options.path)) options.headers['Authorization'] = 'Bearer $token';
       handler.next(options);
     }, onError: (error, handler) async {
       final request = error.requestOptions;
       if (error.response?.statusCode == 401 && request.extra['retried'] != true && !request.path.startsWith('/auth/')) {
+        if (await savedToken('refreshToken') == null) { handler.next(error); return; }
         try {
-          _refreshing ??= _refresh();
-          await _refreshing;
-          request.extra['retried'] = true;
-          request.headers['Authorization'] = 'Bearer ${await storage.read(key: 'access_token')}';
-          return handler.resolve(await dio.fetch<dynamic>(request));
-        } catch (_) {
-          await clearSession();
-        } finally { _refreshing = null; }
+          final current = await savedToken('accessToken');
+          if (request.headers['Authorization'] == 'Bearer $current') {
+            _refreshing ??= _refresh().whenComplete(() => _refreshing = null);
+            await _refreshing;
+          }
+        } on DioException catch (refreshError) {
+          // Offline, 429 and server errors must not sign the user out.
+          if ([401,403].contains(refreshError.response?.statusCode)) await clearSession();
+          handler.next(refreshError); return;
+        } catch (_) { handler.next(error); return; }
+        request.extra['retried'] = true;
+        request.headers['Authorization'] = 'Bearer ${await savedToken('accessToken')}';
+        try { handler.resolve(await dio.fetch<dynamic>(request)); }
+        on DioException catch (retryError) { handler.next(retryError); }
+        return;
       }
       handler.next(error);
     }));
   }
+  Future<String?> savedToken(String name) async {
+    final saved = await storage.read(key:'session');
+    if (saved != null) return (jsonDecode(saved) as Map)[name] as String?;
+    return storage.read(key:name=='accessToken'?'access_token':'refresh_token');
+  }
   Future<void> _refresh() async {
-    final token = await storage.read(key: 'refresh_token');
+    final token = await savedToken('refreshToken');
     if (token == null) throw StateError('No session');
-    final response = await Dio(BaseOptions(baseUrl: baseUrl)).post('/auth/refresh', data: {'refreshToken': token});
-    await storeTokens(Map<String, dynamic>.from(response.data));
+    final response = await (refreshClient ?? Dio(BaseOptions(baseUrl:baseUrl,connectTimeout:const Duration(seconds:15),receiveTimeout:const Duration(seconds:20)))).post('/auth/refresh',data:{'refreshToken':token});
+    await storeTokens(Map<String,dynamic>.from(response.data));
   }
   Future<void> storeTokens(Map<String, dynamic> data) async {
-    await storage.write(key: 'access_token', value: data['accessToken'] as String);
-    await storage.write(key: 'refresh_token', value: data['refreshToken'] as String);
+    // Persist the rotated pair together to avoid partially updated sessions.
+    await storage.write(key:'session',value:jsonEncode({'accessToken':data['accessToken'] as String,'refreshToken':data['refreshToken'] as String}));
+    await storage.delete(key:'access_token'); await storage.delete(key:'refresh_token');
   }
-  Future<void> clearSession() async { await storage.delete(key: 'access_token'); await storage.delete(key: 'refresh_token'); }
+  Future<void> clearSession() async { await storage.delete(key:'session'); await storage.delete(key:'access_token'); await storage.delete(key:'refresh_token'); }
+
   Future<dynamic> get(String path, {Map<String, dynamic>? query}) async => (await dio.get(path, queryParameters: query)).data;
   Future<dynamic> send(String path, {String method = 'POST', dynamic data, Map<String, dynamic>? headers}) async => (await dio.request(path, data: data, options: Options(method: method, headers: headers))).data;
 }

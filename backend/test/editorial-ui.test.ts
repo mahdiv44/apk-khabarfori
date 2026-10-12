@@ -34,5 +34,14 @@ test('reader dashboard never requests editorial or organisation data',async()=>{
 import {parsePublicTelegram} from '../src/collectors/telegram.collector';
 test('public Telegram preview ranks actual visible metrics and labels partial coverage',()=>{
  const now=new Date('2026-10-12T10:00:00Z');const html='<div class="tgme_widget_message" data-post="AkhbareFori/100"><div class="tgme_widget_message_text">An actual post</div><span class="tgme_widget_message_views">1.2K</span><time datetime="2026-10-12T09:00:00Z"></time><a class="tgme_widget_message_photo_wrap" style="background-image:url(https://cdn.example/photo.jpg)"></a></div>';
- const s=parsePublicTelegram(html,now);assert.equal(s.complete,false);assert.equal(s.items[0].views,1200);assert.equal(s.items[0].forwards,null);assert.equal(s.items[0].coverImage,'https://cdn.example/photo.jpg');assert.equal(s.items[0].url,'https://t.me/AkhbareFori/100');assert.equal(parsePublicTelegram(html,new Date('2026-10-14')).items.length,0);
+ const s=parsePublicTelegram(html,now);assert.equal(s.complete,false);assert.equal(s.items[0].views,1200);assert.equal(s.items[0].forwards,null);assert.equal(s.items[0].coverImage,'https://cdn.example/photo.jpg');assert.equal(s.items[0].id,100);assert.equal(parsePublicTelegram(html,new Date('2026-10-14')).items.length,1);
+});
+import {NewsService} from '../src/news';
+test('latest feed includes both sources and does not require measured views or ranking',async()=>{
+ let query:any;const service=new NewsService({news:{findMany:async(q:any)=>{query=q;return []}}} as any);
+ await service.list({sort:'latest'});assert.equal(query.where.status,'PUBLISHED');assert.equal(query.where.sourceKind,undefined);assert.equal(query.where.sourceRank,undefined);assert.equal(query.orderBy[0].publishedAt.sort,'desc');
+});
+test('latest Telegram import keeps visible messages with unknown views',()=>{
+ const snapshot=parsePublicTelegram('<div class="tgme_widget_message" data-post="AkhbareFori/123"><div class="tgme_widget_message_text">Latest</div><time datetime="2026-10-12T09:00:00Z"></time></div>',new Date('2026-10-12T10:00:00Z'));
+ assert.equal(snapshot.items.length,1);assert.equal(snapshot.items[0].views,null);
 });

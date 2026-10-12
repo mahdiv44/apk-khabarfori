@@ -1,3 +1,4 @@
+import {randomUUID} from 'node:crypto';
 import 'reflect-metadata';
 
 import {
@@ -62,6 +63,8 @@ class ErrorFilter implements ExceptionFilter {
       : 500;
 
 
+    const requestId=randomUUID();
+    if(status===500){const req=host.switchToHttp().getRequest();console.error('[service-error]',JSON.stringify({requestId,path:req.path,name:error.name,code:error.code,model:error.meta?.modelName,column:error.meta?.column,trace:String(error.stack||'').split('\n').filter((line:string)=>line.trim().startsWith('at ')).slice(0,3)}));}
     const payload =
       error instanceof HttpException
       ? error.getResponse()
@@ -79,7 +82,7 @@ class ErrorFilter implements ExceptionFilter {
       .json(
         typeof payload==='string'
         ? {message:payload}
-        : payload
+        : {...payload,...status===500?{requestId}:{}}
       );
   }
 }

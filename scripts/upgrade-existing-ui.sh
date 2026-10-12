@@ -3,7 +3,7 @@ set -euo pipefail
 umask 077
 release_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 base=/root/projects/apk-khabarfori
-previous="${KF_PREVIOUS_OVERRIDE:-/root/projects/khabarfori-release-20261011-134600/deploy-existing.json}"
+previous="${KF_PREVIOUS_OVERRIDE:-/root/projects/khabarfori-ui-20261012-121112/deploy-existing-ui.json}"
 test -f "$previous"
 test -f "$base/.env.vps"
 test -f "$release_dir/backend/prisma/migrations/202610120001_editorial_ui/migration.sql"
@@ -30,6 +30,9 @@ for name in ('api','migrate','seed'):
     service=services.setdefault(name,{})
     service['image']='khabarfori-api:'+os.environ['KF_UI_TAG']
     service['build']={'context':str(root/'backend'),'dockerfile':'Dockerfile'}
+env=services['api'].setdefault('environment',{})
+env['NEWS_FEED_URLS']='https://www.khabarfoori.com/fa/feeds/'
+env['NEWS_POPULAR_FEED_URLS']='https://www.khabarfoori.com/fa/feeds/?p=ZGF0ZVJhbmdlJTVCc3RhcnQlNUQ9LTIxNjAwJm9yZGVyPWhpdHM%2C'
 admin=services.setdefault('admin',{})
 admin['image']='khabarfori-admin:'+os.environ['KF_UI_TAG']
 admin['build']={'context':str(root),'dockerfile':'production/Dockerfile.admin'}
@@ -47,6 +50,11 @@ test -s "$backup_dir/database.dump"
 docker exec -i khabarfori-db-1 pg_restore --list < "$backup_dir/database.dump" > "$backup_dir/database-index.txt"
 dc run --rm --no-deps --pull never migrate
 dc run --rm --no-deps --pull never seed
+# Validate actual Prisma queries, not just process liveness.
+dc run --rm --no-deps --pull never api node -e '
+const {PrismaClient}=require("@prisma/client");const {NewsService}=require("./dist/src/news");const db=new PrismaClient();
+(async()=>{try{const service=new NewsService(db);await service.list({sort:"latest",limit:1});await service.list({sort:"trending",limit:1});console.log("NEWS_DATABASE_OK");}finally{await db.$disconnect();}})().catch(e=>{console.error(e.message);process.exitCode=1});'
+
 dc up -d --no-deps --no-build --pull never api
 ready=0
 for attempt in {1..30}; do

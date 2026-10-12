@@ -13,7 +13,7 @@ class NewsPage {
   const NewsPage(this.items, this.nextCursor);
 }
 abstract class NewsRepository {
-  Future<NewsPage> list({String? category, String? query, String? cursor, bool vipOnly = false});
+  Future<NewsPage> list({String? category, String? query, String? cursor, bool vipOnly = false, String sort = 'latest'});
   Future<Article> detail(String id);
   Future<void> bookmark(String id);
 }

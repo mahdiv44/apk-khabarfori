@@ -46,7 +46,7 @@ export class TelegramService {
  async ingest(body:TelegramSnapshot){
   const age=Date.now()-Date.parse(body.capturedAt);
   if(age< -60000||age>900000)throw new BadRequestException('زمان دریافت آمار معتبر نیست.');
-  const value=JSON.parse(JSON.stringify({...body,items:rankTelegram(body.items,new Date(body.capturedAt))}));
+  const value=JSON.parse(JSON.stringify({...body,items:body.items.filter(x=>Date.parse(x.publishedAt)<=Date.parse(body.capturedAt))}));
   await this.db.setting.upsert({where:{key:'telegram:akhbarefori'},create:{key:'telegram:akhbarefori',value},update:{value}});
   return {ok:true};
  }

@@ -35,7 +35,7 @@ class SplashScreen extends ConsumerStatefulWidget {
 class _SplashState extends ConsumerState<SplashScreen> {
   @override void initState() { super.initState(); _start(); }
   Future<void> _start() async {
-    await ref.read(apiProvider).storage.read(key: 'access_token');
+    await ref.read(apiProvider).savedToken('accessToken');
     if (!mounted) return;
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
   }
