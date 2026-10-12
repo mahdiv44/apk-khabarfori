@@ -15,6 +15,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NewsImportService } from './collectors/news-import.service';
 import helmet from 'helmet';
+import {DashboardController} from './dashboard';
 import {SalaryAccess,PasskeyController} from './salary';
 import {MeetingsController,MeetingReminders} from './meetings';
 import {CollectorController} from './collectors/news.scheduler';
@@ -117,6 +118,7 @@ controllers:[
 
 AuthController,
 PasskeyController,
+DashboardController,
 MeetingsController,
 CollectorController,
 NewsController,

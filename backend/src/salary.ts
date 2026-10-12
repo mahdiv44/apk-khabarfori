@@ -10,7 +10,7 @@ class CredentialDto {@IsObject() response!:any;}
 @Injectable()
 export class SalaryAccess {
  constructor(private db:Db,private jwt:JwtService){}
- async profile(user:Principal){const e=await this.db.employee.findUnique({where:{userId:user.id},include:{salaryProfile:true}});if(!e||e.status!=='ACTIVE'||!e.salaryProfile)throw new UnauthorizedException('مدیر باید حساب شما را به پرونده پرسنلی و حقوقی متصل کند.');return e.salaryProfile}
+ async profile(user:Principal){const e=await this.db.employee.findUnique({where:{userId:user.id},include:{salaryProfile:true}});if(!e||e.status!=='ACTIVE')throw new UnauthorizedException('مدیر باید حساب شما را به پرونده پرسنلی فعال متصل کند.');return e.salaryProfile||this.db.salaryProfile.upsert({where:{employeeId:e.id},create:{employeeId:e.id},update:{}})}
  async issue(user:Principal,expectedVersion?:number){const p=await this.profile(user);if(expectedVersion!==undefined&&p.version!==expectedVersion)throw new UnauthorizedException();return {unlocked:true,expiresIn:300,salaryToken:await this.jwt.signAsync({sub:user.id,ver:user.tokenVersion,profile:p.id,pv:p.version,type:'salary'},{expiresIn:'5m',issuer:'khabarfori',audience:'khabarfori-salary'})}}
  async unlock(user:Principal,password:string){
   if(Buffer.byteLength(password)>72)throw new BadRequestException();
@@ -20,12 +20,13 @@ export class SalaryAccess {
    await tx.$queryRaw`SELECT id FROM salary_profiles WHERE id=${p.id}::uuid FOR UPDATE`;
    const current=await tx.salaryProfile.findUniqueOrThrow({where:{id:p.id}});
    if(current.lockedUntil&&current.lockedUntil>new Date())return false;
-   const ok=await compare(password,current.salaryPasswordHash);
+   const account=await tx.user.findUniqueOrThrow({where:{id:user.id}});
+   const ok=account.active&&account.tokenVersion===user.tokenVersion&&await compare(password,account.passwordHash);
    const attempts=current.lockedUntil?1:current.failedAttempts+1;
    await tx.salaryProfile.update({where:{id:p.id},data:{failedAttempts:ok?0:attempts,lockedUntil:!ok&&attempts>=5?new Date(Date.now()+900000):null}});
    return ok;
   });
-  if(!valid)throw new UnauthorizedException('رمز نادرست است یا دسترسی موقتاً قفل شده است.');
+  if(!valid)throw new UnauthorizedException('رمز حساب نادرست است یا دسترسی موقتاً قفل شده است.');
   return this.issue(user,p.version);
  }
  async verify(user:Principal,token:string){try{const c=await this.jwt.verifyAsync(token,{algorithms:['HS256'],issuer:'khabarfori',audience:'khabarfori-salary'});const p=await this.profile(user);if(c.type!=='salary'||c.sub!==user.id||c.ver!==user.tokenVersion||c.profile!==p.id||c.pv!==p.version)throw Error();return p}catch{throw new UnauthorizedException('برای دیدن فیش، قفل حقوق را باز کنید.')}}

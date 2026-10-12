@@ -22,9 +22,11 @@ export class ReplyDto{@IsString() @MaxLength(10000) reply!:string;@IsIn(['NEW','
 export class EmployeeDto{@IsOptional() @IsUUID() userId?:string;@IsString() @MinLength(2) @MaxLength(100) fullName!:string;@IsString() @MinLength(2) @MaxLength(100) position!:string;@IsIn(['مدیریت','تحریریه','خبرنگاری','روابط عمومی','فنی','پشتیبانی']) department!:string;@IsString() @MaxLength(2000) biography!:string;@IsEmail() email!:string;@IsOptional() @IsString() @MaxLength(30) phone?:string;@IsOptional() @IsString() @MaxLength(30) employeeCode?:string;@IsOptional() @IsISO8601() employmentDate?:string;@IsOptional() @IsIn(['ACTIVE','INACTIVE','ON_LEAVE']) status?:string}
 export class SalaryUnlockDto{@IsString() @MinLength(8) @MaxLength(72) password!:string}
 export class SalaryRecordDto{@IsString() @Matches(/^\d{4}-(0[1-9]|1[0-2])$/) period!:string;@IsInt() @Min(0) @Max(2147483647) grossAmount!:number;@IsInt() @Min(0) @Max(2147483647) netAmount!:number;@IsOptional() @IsString() @MaxLength(1000) notes?:string}
-export class RoleDto{@IsArray() @ArrayMaxSize(6) @IsIn(['SUPER_ADMIN','HOLDING_MANAGER','EDITOR_IN_CHIEF','EMPLOYEE','VIP_SUBSCRIBER','NORMAL_USER'],{each:true}) roles!:string[]}
+export class RoleDto{@IsArray() @ArrayMaxSize(7) @IsIn(['SUPER_ADMIN','HOLDING_MANAGER','EDITOR','EDITOR_IN_CHIEF','EMPLOYEE','VIP_SUBSCRIBER','NORMAL_USER'],{each:true}) roles!:string[]}
 export class CheckoutDto{@IsIn(['monthly','quarterly','yearly']) planId!:string}
 export class CommentDto{@IsString() @MinLength(1) @MaxLength(2000) body!:string}
 export class DeviceDto{@IsString() @MinLength(20) @MaxLength(4096) token!:string}
 
 export class EmployeeLinkDto{@IsUUID() userId!:string}
+
+export class NewsStatusDto{@IsIn(["REVIEW","PUBLISHED","DRAFT"]) status!:"REVIEW"|"PUBLISHED"|"DRAFT"}

@@ -1,3 +1,4 @@
+import 'newsroom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,13 +18,13 @@ Future<void> main() async {
   }
   runApp(const ProviderScope(child: KhabarFori()));
 }
-class KhabarFori extends StatelessWidget {
+class KhabarFori extends ConsumerWidget {
   const KhabarFori({super.key});
-  @override Widget build(BuildContext context) => MaterialApp(
+  @override Widget build(BuildContext context, WidgetRef ref) => MaterialApp(
     title: 'KhabarFori', debugShowCheckedModeBanner: false,
     locale: const Locale('fa'), supportedLocales: const [Locale('fa'), Locale('en')],
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
-    theme: ThemeData(useMaterial3: true, colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff165d49)), scaffoldBackgroundColor: const Color(0xfff5f7f6), appBarTheme: const AppBarTheme(backgroundColor: Colors.white), inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder())),
+    theme: newsroomTheme(Brightness.light), darkTheme: newsroomTheme(Brightness.dark), themeMode: ref.watch(appearanceProvider),
     home: const SplashScreen(),
   );
 }

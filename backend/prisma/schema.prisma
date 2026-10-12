@@ -160,6 +160,8 @@ model NewsTag {
 }
 
 model News {
+  sourceRank Int?
+  sourceSeenAt DateTime?
   id          String      @id @default(uuid()) @db.Uuid
   title       String      @db.VarChar(200)
   description String      @db.VarChar(500)
@@ -308,7 +310,7 @@ model SalaryProfile {
   id                 String         @id @default(uuid()) @db.Uuid
   employeeId         String         @unique @db.Uuid
   version            Int            @default(0)
-  salaryPasswordHash String
+  salaryPasswordHash String?
   employee           Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   records            SalaryRecord[]
   failedAttempts     Int            @default(0)

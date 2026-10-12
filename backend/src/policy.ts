@@ -1,6 +1,7 @@
 export const rolePermissions:Record<string,string[]>={
  SUPER_ADMIN:['*'],
  HOLDING_MANAGER:['meetings:write','analytics:read','employees:read','employees:write','news:read-internal','messages:read','messages:reply','messages:write','users:read'],
+ EDITOR:['news:write','news:read-internal','employees:read','messages:write'],
  EDITOR_IN_CHIEF:['news:write','news:publish','news:read-internal','employees:read','messages:read','messages:reply','messages:write','analytics:read'],
  EMPLOYEE:['news:write','employees:read','messages:write'],
  VIP_SUBSCRIBER:[],NORMAL_USER:[]

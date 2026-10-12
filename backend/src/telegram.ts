@@ -1,11 +1,12 @@
 import {Body,Controller,Get,Headers,Injectable,Post,UnauthorizedException,ServiceUnavailableException,BadRequestException} from '@nestjs/common';
 import {Type} from 'class-transformer';
-import {ArrayMaxSize,IsArray,IsBoolean,IsInt,IsISO8601,IsOptional,IsString,Max,MaxLength,Min,ValidateNested} from 'class-validator';
+import {ArrayMaxSize,IsArray,IsBoolean,IsInt,IsISO8601,IsOptional,IsString,IsUrl,Max,MaxLength,Min,ValidateNested} from 'class-validator';
 import {timingSafeEqual} from 'node:crypto';
 import {Db} from './db';
 import {Public} from './security';
 
 export class TelegramItem {
+ @IsOptional() @IsUrl({protocols:["https"],require_protocol:true}) @MaxLength(2048) coverImage?:string;
  @IsInt() @Min(1) @Max(2147483647) id!:number;
  @IsString() @MaxLength(280) excerpt!:string;
  @IsISO8601() publishedAt!:string;
